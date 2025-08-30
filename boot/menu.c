@@ -21,6 +21,8 @@
 #include "../config/config_ini.h"
 #include "../config/config_json.h"
 #include "../config/config_env.h"
+#include "font.h"
+#include "../security/crypto.h"
 
 // what the FUCK! NOT POSSIBLE BABY IM C GOD
 // but you gotta admit one thing. THAT UR SMART !!!

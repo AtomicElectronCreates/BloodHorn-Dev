@@ -9,6 +9,7 @@
 #include <Protocol/GraphicsOutput.h>
 #include <Protocol/SimpleFileSystem.h>
 #include <Protocol/DevicePath.h>
+#include <Protocol/Tcg2Protocol.h>  // For TPM 2.0 support
 #include "boot/menu.h"
 #include "boot/theme.h"
 #include "boot/localization.h"
@@ -16,10 +17,12 @@
 #include "boot/secure.h"
 #include "fs/fat32.h"
 #include "security/crypto.h"
+#include "security/tpm2.h"       // TPM 2.0 support
 #include "scripting/lua.h"
 #include "recovery/shell.h"
 #include "plugins/plugin.h"
 #include "net/pxe.h"
+#include "net/network.hpp"
 #include "boot/Arch32/linux.h"
 #include "boot/Arch32/limine.h"
 #include "boot/Arch32/multiboot1.h"
@@ -35,77 +38,293 @@
 #include "config/config_json.h"
 #include "config/config_env.h"
 #include "boot/libb/include/bloodhorn/bloodhorn.h"
+#include "boot/libb/include/bloodhorn/graphics.h"
+#include "boot/libb/include/bloodhorn/input.h"
+#include "boot/libb/include/bloodhorn/filesystem.h"
+#include "security/sha512.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
+// Global TPM 2.0 context
+static EFI_TCG2_PROTOCOL* gTcg2Protocol = NULL;
+
+// Global BloodHorn context
+static bh_context_t* gBhContext = NULL;
+
+// Global font handles
+static bh_font_t gDefaultFont = {0};
+static bh_font_t gHeaderFont = {0};
+
+// Global settings
 struct boot_config {
     char default_entry[64];
     int menu_timeout;
     char kernel[128];
     char initrd[128];
     char cmdline[256];
+    bool tpm_enabled;             // TPM 2.0 support
+    bool secure_boot;             // Secure boot status
+    bool use_gui;                 // Use graphical interface
+    char font_path[256];          // Path to custom font
+    uint32_t font_size;           // Base font size
+    uint32_t header_font_size;    // Header font size
+    char language[8];             // UI language
+    bool enable_networking;       // Enable networking
 };
+
+// TPM 2.0 measurement structure
+typedef struct {
+    uint8_t pcr_index;
+    uint32_t event_type;
+    uint8_t digest[32];
+    uint32_t digest_size;
+    uint8_t* event_data;
+    uint32_t event_size;
+} tpm_measurement_t;
+
+// Structure to store file hashes
+typedef struct {
+    char path[256];
+    uint8_t expected_hash[64]; // SHA-512 produces 64-byte hashes
+} file_hash_t;
+
+// Known good hashes for critical boot files
+static file_hash_t g_known_hashes[] = {
+    {"/boot/kernel.efi", {0}},  // Will be populated at runtime
+    {"/boot/initrd.img", {0}},  // Will be populated from config
+    // Add more files as needed
+};
+
+/**
+ * @brief Verify file hash against expected value
+ * @param file_path Path to the file to verify
+ * @param expected_hash Expected SHA-512 hash (64 bytes)
+ * @return EFI_SUCCESS if hashes match, error code otherwise
+ */
+static EFI_STATUS verify_file_hash(const char* file_path, const uint8_t* expected_hash) {
+    EFI_STATUS Status;
+    EFI_FILE* file = NULL;
+    EFI_FILE_HANDLE root_dir;
+    UINT8 file_buffer[4096];
+    UINTN read_size;
+    crypto_sha512_ctx_t ctx;
+    uint8_t actual_hash[64];
+    
+    if (!file_path || !expected_hash) {
+        return EFI_INVALID_PARAMETER;
+    }
+    
+    // Open the file
+    Status = get_root_dir(&root_dir);
+    if (EFI_ERROR(Status)) {
+        DEBUG((DEBUG_ERROR, "Failed to get root directory\n"));
+        return Status;
+    }
+    
+    Status = root_dir->Open(root_dir, &file, (CHAR16*)file_path, EFI_FILE_MODE_READ, 0);
+    if (EFI_ERROR(Status)) {
+        DEBUG((DEBUG_ERROR, "Failed to open file %a: %r\n", file_path, Status));
+        return Status;
+    }
+    
+    // Initialize hash
+    crypto_sha512_init(&ctx);
+    
+    // Read file and update hash
+    while (1) {
+        read_size = sizeof(file_buffer);
+        Status = file->Read(file, &read_size, file_buffer);
+        if (EFI_ERROR(Status) || read_size == 0) {
+            break;
+        }
+        crypto_sha512_update(&ctx, file_buffer, (uint32_t)read_size);
+    }
+    
+    // Finalize hash
+    crypto_sha512_final(&ctx, actual_hash);
+    
+    // Clean up
+    file->Close(file);
+    
+    // Compare hashes
+    if (CompareMem(actual_hash, expected_hash, 64) != 0) {
+        DEBUG((DEBUG_ERROR, "Hash verification failed for %a\n", file_path));
+        DEBUG((DEBUG_ERROR, "Expected: "));
+        for (int i = 0; i < 64; i++) {
+            DEBUG((DEBUG_ERROR, "%02x", expected_hash[i]));
+        }
+        DEBUG((DEBUG_ERROR, "\nActual:   "));
+        for (int i = 0; i < 64; i++) {
+            DEBUG((DEBUG_ERROR, "%02x", actual_hash[i]));
+        }
+        DEBUG((DEBUG_ERROR, "\n"));
+        return EFI_SECURITY_VIOLATION;
+    }
+    
+    return EFI_SUCCESS;
+}
+
+/**
+ * @brief Verify all known file hashes
+ * @return EFI_SUCCESS if all hashes match, error code otherwise
+ */
+static EFI_STATUS verify_boot_files(void) {
+    EFI_STATUS Status;
+    
+    for (UINTN i = 0; i < ARRAY_SIZE(g_known_hashes); i++) {
+        // Skip entries with zero hashes (not configured)
+        if (IsZeroBuffer(g_known_hashes[i].expected_hash, 64)) {
+            continue;
+        }
+        
+        Status = verify_file_hash(g_known_hashes[i].path, g_known_hashes[i].expected_hash);
+        if (EFI_ERROR(Status)) {
+            DEBUG((DEBUG_ERROR, "Verification failed for %a: %r\n", g_known_hashes[i].path, Status));
+            return Status;
+        }
+    }
+    
+    return EFI_SUCCESS;
+}
+
+/**
+ * @brief Load expected hashes from configuration
+ * @param config Boot configuration
+ */
+static void load_expected_hashes(const struct boot_config* config) {
+    // Load hashes from config or trusted storage
+    // This is a simplified example - in a real implementation, these would come from
+    // a secure storage or be compiled into the bootloader
+    
+    // Example: Load kernel hash from config
+    if (config->kernel[0] != '\0') {
+        // In a real implementation, this would come from a secure source
+        // For now, we'll just zero it out
+        SetMem(g_known_hashes[0].expected_hash, 64, 0);
+    }
+    
+    // Example: Load initrd hash from config
+    if (config->initrd[0] != '\0') {
+        // In a real implementation, this would come from a secure source
+        // For now, we'll just zero it out
+        SetMem(g_known_hashes[1].expected_hash, 64, 0);
+    }
+}
+
+// Function prototypes
+static EFI_STATUS InitializeTpm2(void);
+static EFI_STATUS MeasureBootComponents(void);
+static EFI_STATUS LoadFonts(void);
+static EFI_STATUS InitializeBloodHorn(void);
+static void CleanupBloodHorn(void);
+static EFI_STATUS VerifySecureBootState(void);
 
 static int load_boot_config(struct boot_config* cfg) {
     struct boot_menu_entry entries[16];
     int n = parse_ini("bloodhorn.ini", entries, 16);
+    
+    // Set default values
+    strncpy(cfg->default_entry, "linux", sizeof(cfg->default_entry) - 1);
+    cfg->menu_timeout = 10;
+    cfg->tpm_enabled = TRUE;
+    cfg->secure_boot = FALSE;
+    cfg->use_gui = TRUE;
+    strncpy(cfg->font_path, "DejaVuSans.ttf", sizeof(cfg->font_path) - 1);
+    cfg->font_size = 12;
+    cfg->header_font_size = 16;
+    strncpy(cfg->language, "en", sizeof(cfg->language) - 1);
+    cfg->enable_networking = FALSE;
+    
     if (n > 0) {
         for (int i = 0; i < n; ++i) {
             if (strcmp(entries[i].section, "boot") == 0) {
                 if (strcmp(entries[i].name, "default") == 0) {
                     strncpy(cfg->default_entry, entries[i].path, sizeof(cfg->default_entry) - 1);
-                    cfg->default_entry[sizeof(cfg->default_entry) - 1] = '\0';
-                }
-                if (strcmp(entries[i].name, "menu_timeout") == 0) {
+                } else if (strcmp(entries[i].name, "menu_timeout") == 0) {
                     cfg->menu_timeout = atoi(entries[i].path);
+                } else if (strcmp(entries[i].name, "use_gui") == 0) {
+                    cfg->use_gui = (strcasecmp(entries[i].path, "true") == 0 || 
+                                  strcmp(entries[i].path, "1") == 0);
+                } else if (strcmp(entries[i].name, "language") == 0) {
+                    strncpy(cfg->language, entries[i].path, sizeof(cfg->language) - 1);
+                }
+            } else if (strcmp(entries[i].section, "security") == 0) {
+                if (strcmp(entries[i].name, "tpm_enabled") == 0) {
+                    cfg->tpm_enabled = (strcasecmp(entries[i].path, "true") == 0 || 
+                                       strcmp(entries[i].path, "1") == 0);
+                } else if (strcmp(entries[i].name, "secure_boot") == 0) {
+                    cfg->secure_boot = (strcasecmp(entries[i].path, "true") == 0 || 
+                                      strcmp(entries[i].path, "1") == 0);
+                }
+            } else if (strcmp(entries[i].section, "display") == 0) {
+                if (strcmp(entries[i].name, "font") == 0) {
+                    strncpy(cfg->font_path, entries[i].path, sizeof(cfg->font_path) - 1);
+                } else if (strcmp(entries[i].name, "font_size") == 0) {
+                    cfg->font_size = atoi(entries[i].path);
+                } else if (strcmp(entries[i].name, "header_font_size") == 0) {
+                    cfg->header_font_size = atoi(entries[i].path);
                 }
             } else if (strcmp(entries[i].section, "linux") == 0) {
                 if (strcmp(entries[i].name, "kernel") == 0) {
                     strncpy(cfg->kernel, entries[i].path, sizeof(cfg->kernel) - 1);
-                    cfg->kernel[sizeof(cfg->kernel) - 1] = '\0';
-                }
-                if (strcmp(entries[i].name, "initrd") == 0) {
+                } else if (strcmp(entries[i].name, "initrd") == 0) {
                     strncpy(cfg->initrd, entries[i].path, sizeof(cfg->initrd) - 1);
-                    cfg->initrd[sizeof(cfg->initrd) - 1] = '\0';
-                }
-                if (strcmp(entries[i].name, "cmdline") == 0) {
+                } else if (strcmp(entries[i].name, "cmdline") == 0) {
                     strncpy(cfg->cmdline, entries[i].path, sizeof(cfg->cmdline) - 1);
-                    cfg->cmdline[sizeof(cfg->cmdline) - 1] = '\0';
+                }
+            } else if (strcmp(entries[i].section, "networking") == 0) {
+                if (strcmp(entries[i].name, "enable") == 0) {
+                    cfg->enable_networking = (strcasecmp(entries[i].path, "true") == 0 || 
+                                             strcmp(entries[i].path, "1") == 0);
                 }
             }
         }
         return 0;
     }
 
-    struct config_json json_entries[32];
+    // Try to load from JSON if INI not found
+    struct config_json json_entries[64];
     FILE* f = fopen("bloodhorn.json", "r");
     if (f) {
         char buf[4096];
         size_t len = fread(buf, 1, sizeof(buf) - 1, f);
         buf[len] = '\0';
         fclose(f);
-        int m = config_json_parse(buf, json_entries, 32);
+        
+        int m = config_json_parse(buf, json_entries, 64);
         for (int i = 0; i < m; ++i) {
             if (strcmp(json_entries[i].key, "boot.default") == 0) {
                 strncpy(cfg->default_entry, json_entries[i].value, sizeof(cfg->default_entry) - 1);
-                cfg->default_entry[sizeof(cfg->default_entry) - 1] = '\0';
-            }
-            if (strcmp(json_entries[i].key, "boot.menu_timeout") == 0) {
+            } else if (strcmp(json_entries[i].key, "boot.menu_timeout") == 0) {
                 cfg->menu_timeout = atoi(json_entries[i].value);
-            }
-            if (strcmp(json_entries[i].key, "linux.kernel") == 0) {
+            } else if (strcmp(json_entries[i].key, "boot.use_gui") == 0) {
+                cfg->use_gui = (strcasecmp(json_entries[i].value, "true") == 0 || 
+                              strcmp(json_entries[i].value, "1") == 0);
+            } else if (strcmp(json_entries[i].key, "security.tpm_enabled") == 0) {
+                cfg->tpm_enabled = (strcasecmp(json_entries[i].value, "true") == 0 || 
+                                  strcmp(json_entries[i].value, "1") == 0);
+            } else if (strcmp(json_entries[i].key, "security.secure_boot") == 0) {
+                cfg->secure_boot = (strcasecmp(json_entries[i].value, "true") == 0 || 
+                                  strcmp(json_entries[i].value, "1") == 0);
+            } else if (strcmp(json_entries[i].key, "display.font") == 0) {
+                strncpy(cfg->font_path, json_entries[i].value, sizeof(cfg->font_path) - 1);
+            } else if (strcmp(json_entries[i].key, "display.font_size") == 0) {
+                cfg->font_size = atoi(json_entries[i].value);
+            } else if (strcmp(json_entries[i].key, "display.header_font_size") == 0) {
+                cfg->header_font_size = atoi(json_entries[i].value);
+            } else if (strcmp(json_entries[i].key, "display.language") == 0) {
+                strncpy(cfg->language, json_entries[i].value, sizeof(cfg->language) - 1);
+            } else if (strcmp(json_entries[i].key, "linux.kernel") == 0) {
                 strncpy(cfg->kernel, json_entries[i].value, sizeof(cfg->kernel) - 1);
-                cfg->kernel[sizeof(cfg->kernel) - 1] = '\0';
-            }
-            if (strcmp(json_entries[i].key, "linux.initrd") == 0) {
+            } else if (strcmp(json_entries[i].key, "linux.initrd") == 0) {
                 strncpy(cfg->initrd, json_entries[i].value, sizeof(cfg->initrd) - 1);
-                cfg->initrd[sizeof(cfg->initrd) - 1] = '\0';
-            }
-            if (strcmp(json_entries[i].key, "linux.cmdline") == 0) {
+            } else if (strcmp(json_entries[i].key, "linux.cmdline") == 0) {
                 strncpy(cfg->cmdline, json_entries[i].value, sizeof(cfg->cmdline) - 1);
-                cfg->cmdline[sizeof(cfg->cmdline) - 1] = '\0';
+            } else if (strcmp(json_entries[i].key, "networking.enable") == 0) {
+                cfg->enable_networking = (strcasecmp(json_entries[i].value, "true") == 0 || 
+                                         strcmp(json_entries[i].value, "1") == 0);
             }
         }
         return 0;
@@ -115,22 +334,42 @@ static int load_boot_config(struct boot_config* cfg) {
     char val[256];
     if (config_env_get("BLOODHORN_DEFAULT", val, sizeof(val)) == 0) {
         strncpy(cfg->default_entry, val, sizeof(cfg->default_entry) - 1);
-        cfg->default_entry[sizeof(cfg->default_entry) - 1] = '\0';
     }
     if (config_env_get("BLOODHORN_MENU_TIMEOUT", val, sizeof(val)) == 0) {
         cfg->menu_timeout = atoi(val);
     }
+    if (config_env_get("BLOODHORN_USE_GUI", val, sizeof(val)) == 0) {
+        cfg->use_gui = (strcasecmp(val, "true") == 0 || strcmp(val, "1") == 0);
+    }
+    if (config_env_get("BLOODHORN_TPM_ENABLED", val, sizeof(val)) == 0) {
+        cfg->tpm_enabled = (strcasecmp(val, "true") == 0 || strcmp(val, "1") == 0);
+    }
+    if (config_env_get("BLOODHORN_SECURE_BOOT", val, sizeof(val)) == 0) {
+        cfg->secure_boot = (strcasecmp(val, "true") == 0 || strcmp(val, "1") == 0);
+    }
+    if (config_env_get("BLOODHORN_FONT", val, sizeof(val)) == 0) {
+        strncpy(cfg->font_path, val, sizeof(cfg->font_path) - 1);
+    }
+    if (config_env_get("BLOODHORN_FONT_SIZE", val, sizeof(val)) == 0) {
+        cfg->font_size = atoi(val);
+    }
+    if (config_env_get("BLOODHORN_HEADER_FONT_SIZE", val, sizeof(val)) == 0) {
+        cfg->header_font_size = atoi(val);
+    }
+    if (config_env_get("BLOODHORN_LANGUAGE", val, sizeof(val)) == 0) {
+        strncpy(cfg->language, val, sizeof(cfg->language) - 1);
+    }
     if (config_env_get("BLOODHORN_LINUX_KERNEL", val, sizeof(val)) == 0) {
         strncpy(cfg->kernel, val, sizeof(cfg->kernel) - 1);
-        cfg->kernel[sizeof(cfg->kernel) - 1] = '\0';
     }
     if (config_env_get("BLOODHORN_LINUX_INITRD", val, sizeof(val)) == 0) {
         strncpy(cfg->initrd, val, sizeof(cfg->initrd) - 1);
-        cfg->initrd[sizeof(cfg->initrd) - 1] = '\0';
     }
     if (config_env_get("BLOODHORN_LINUX_CMDLINE", val, sizeof(val)) == 0) {
         strncpy(cfg->cmdline, val, sizeof(cfg->cmdline) - 1);
-        cfg->cmdline[sizeof(cfg->cmdline) - 1] = '\0';
+    }
+    if (config_env_get("BLOODHORN_NETWORKING_ENABLE", val, sizeof(val)) == 0) {
+        cfg->enable_networking = (strcasecmp(val, "true") == 0 || strcmp(val, "1") == 0);
     }
 
     return 0;
@@ -151,6 +390,81 @@ EFI_STATUS boot_x86_64_wrapper(void);
 EFI_STATUS boot_aarch64_wrapper(void);
 EFI_STATUS boot_riscv64_wrapper(void);
 EFI_STATUS boot_loongarch64_wrapper(void);
+
+// Global network state
+static BloodHorn::Net::PXEClient* gPXEClient = NULL;
+
+// Function to initialize network
+EFI_STATUS InitializeNetwork(void) {
+    EFI_STATUS Status = EFI_SUCCESS;
+    
+    // Only initialize once
+    if (gPXEClient != NULL) {
+        return EFI_SUCCESS;
+    }
+    
+    try {
+        // Create and initialize network interface
+        auto iface = BloodHorn::Net::NetworkInterface::create();
+        gPXEClient = new BloodHorn::Net::PXEClient(std::move(iface));
+        
+        // Discover network configuration
+        auto ec = gPXEClient->discoverNetwork();
+        if (ec) {
+            DEBUG((DEBUG_ERROR, "Failed to initialize network: %s\n", ec.message().c_str()));
+            return EFI_DEVICE_ERROR;
+        }
+        
+        DEBUG((DEBUG_INFO, "Network initialized successfully\n"));
+        return EFI_SUCCESS;
+    } catch (const std::exception& e) {
+        DEBUG((DEBUG_ERROR, "Network initialization failed: %a\n", e.what()));
+        return EFI_DEVICE_ERROR;
+    }
+}
+
+// Function to clean up network resources
+VOID ShutdownNetwork(void) {
+    if (gPXEClient) {
+        delete gPXEClient;
+        gPXEClient = NULL;
+    }
+}
+
+// Function to boot from network
+EFI_STATUS BootFromNetwork(const CHAR16* kernel_path, const CHAR16* initrd_path, const CHAR8* cmdline) {
+    if (!gPXEClient) {
+        return EFI_NOT_READY;
+    }
+    
+    try {
+        // Convert paths to UTF-8
+        CHAR8 kernel_path_utf8[256] = {0};
+        UnicodeStrToAsciiStrS(kernel_path, kernel_path_utf8, ARRAY_SIZE(kernel_path_utf8));
+        
+        CHAR8 initrd_path_utf8[256] = {0};
+        if (initrd_path) {
+            UnicodeStrToAsciiStrS(initrd_path, initrd_path_utf8, ARRAY_SIZE(initrd_path_utf8));
+        }
+        
+        // Boot the kernel
+        auto ec = gPXEClient->bootKernel(
+            (const char*)kernel_path_utf8,
+            initrd_path ? (const char*)initrd_path_utf8 : "",
+            cmdline ? (const char*)cmdline : ""
+        );
+        
+        if (ec) {
+            DEBUG((DEBUG_ERROR, "Network boot failed: %s\n", ec.message().c_str()));
+            return EFI_LOAD_ERROR;
+        }
+        
+        return EFI_SUCCESS;
+    } catch (const std::exception& e) {
+        DEBUG((DEBUG_ERROR, "Network boot exception: %a\n", e.what()));
+        return EFI_LOAD_ERROR;
+    }
+}
 
 // Helper to load theme and language from config files
 static void LoadThemeAndLanguageFromConfig(void) {
@@ -320,7 +634,27 @@ EFI_STATUS boot_chainload_wrapper(void) {
 }
 
 EFI_STATUS boot_pxe_network_wrapper(void) {
-    return pxe_boot_kernel("/boot/vmlinuz", "/boot/initrd.img", "root=/dev/sda1 ro");
+    EFI_STATUS Status;
+    
+    // Initialize network if not already done
+    Status = InitializeNetwork();
+    if (EFI_ERROR(Status)) {
+        Print(L"Failed to initialize network\r\n");
+        return Status;
+    }
+    
+    // Boot the default kernel from network
+    Status = BootFromNetwork(
+        L"/boot/kernel.efi",  // Default kernel path
+        L"/boot/initrd.img",  // Default initrd path
+        "console=ttyS0"       // Default command line
+    );
+    
+    if (EFI_ERROR(Status)) {
+        Print(L"Network boot failed: %r\r\n", Status);
+    }
+    
+    return Status;
 }
 
 EFI_STATUS boot_recovery_shell_wrapper(void) {

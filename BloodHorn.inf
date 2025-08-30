@@ -4,17 +4,137 @@
   FILE_GUID              = DEADBEEF-DEAD-BEEF-DEAD-DEADBEEF0001
   MODULE_TYPE            = UEFI_APPLICATION
   ENTRY_POINT            = UefiMain
+  VERSION_STRING         = 1.0
+  UEFI_SPECIFICATION_VERSION = 0x0002001E
+  PI_SPECIFICATION_VERSION  = 0x00010005
 
 [Sources]
+  main.c
+  net/arp.c
+  net/dhcp.c
+  net/net_utils.c
+  net/pxe.c
+  net/tftp.c
+  net/uefi_network.cpp
+  security/sha512.c
+  boot/Arch32/BloodChain/bloodchain.c
+  boot/Arch32/linux.c
+  boot/Arch32/limine.c
+  boot/Arch32/multiboot1.c
+  boot/Arch32/multiboot2.c
+  boot/Arch32/chainload.c
+  boot/Arch32/ia32.c
+  boot/Arch32/x86_64.c
+  boot/Arch32/aarch64.c
+  boot/Arch32/riscv64.c
+  boot/Arch32/loongarch64.c
+  boot/menu.c
+  boot/theme.c
+  boot/mouse.c
+  fs/fat32.c
+  fs/ext2.c
+  security/crypto.c
+  security/tpm2.c
+  scripting/lua.c
+  recovery/shell.c
+  recovery/shell_cmds.c
+  plugins/plugin.c
+  plugins/plugin_loader.c
+  config/config_ini.c
+  config/config_json.c
+  config/config_env.c
   BloodHorn.c
+
+[Sources.Common]
+  net/network.hpp
+  boot/libb/include/bloodhorn/bloodhorn.h
+  boot/libb/include/bloodhorn/graphics.h
+  boot/libb/include/bloodhorn/input.h
+  boot/libb/include/bloodhorn/filesystem.h
+  boot/libb/include/bloodhorn/uefi.h
 
 [Packages]
   MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  NetworkPkg/NetworkPkg.dec
+  CryptoPkg/CryptoPkg.dec
+  StdLib/StdLib.dec
 
 [LibraryClasses]
   UefiLib
-  BaseLib
+  UefiApplicationEntryPoint
+  UefiBootServicesTableLib
+  UefiRuntimeServicesTableLib
+  UefiRuntimeLib
   MemoryAllocationLib
   DebugLib
   PrintLib
   PcdLib
+  BaseLib
+  BaseMemoryLib
+  DebugPrintErrorLevelLib
+  PeCoffExtraActionLib
+  ReportStatusCodeLib
+  PerformanceLib
+  CacheMaintenanceLib
+  UefiDecompressLib
+  OrderedCollectionLib
+  SafeIntLib
+  SynchronizationLib
+  TimerLib
+  TpmMeasurementLib
+  Tpm2CommandLib
+  Tpm2DeviceLib
+  Tpm2DeviceLibTcg2
+  Tpm2DeviceLibRouter
+  DxeServicesLib
+  DxeServicesTableLib
+  UefiDriverEntryPoint
+  UefiScsiLib
+  UefiUsbLib
+  UefiHiiServicesLib
+  UefiHiiLib
+
+[LibraryClasses.common.UEFI_APPLICATION]
+  UefiApplicationEntryPoint
+  UefiLib
+  UefiBootServicesTableLib
+  UefiRuntimeServicesTableLib
+  MemoryAllocationLib
+  DebugLib
+  PrintLib
+  PcdLib
+  BaseLib
+  BaseMemoryLib
+  DebugPrintErrorLevelLib
+  PeCoffExtraActionLib
+  ReportStatusCodeLib
+  PerformanceLib
+  CacheMaintenanceLib
+  UefiDecompressLib
+  OrderedCollectionLib
+  SafeIntLib
+  SynchronizationLib
+  TimerLib
+  TpmMeasurementLib
+  Tpm2CommandLib
+  Tpm2DeviceLib
+  Tpm2DeviceLibTcg2
+  Tpm2DeviceLibRouter
+  DxeServicesLib
+  DxeServicesTableLib
+  UefiDriverEntryPoint
+  UefiScsiLib
+  UefiUsbLib
+  UefiHiiServicesLib
+  UefiHiiLib
+
+[BuildOptions]
+  MSFT:*_*_*_CC_FLAGS = /D UNICODE
+  GCC:*_*_*_CC_FLAGS = -DUNICODE -std=c++17
+  XCODE:*_*_*_CC_FLAGS = -DUNICODE -std=c++17
+  INTEL:*_*_*_CC_FLAGS = /D UNICODE /Qstd=c++17
+  RVCT:*_*_*_CC_FLAGS = -DUNICODE --cpp11
+
+[BuildOptions.common.EDKII.UEFI_APPLICATION]
+  *_*_*_CC_FLAGS = -D DISABLE_NEW_DEPRECATED_INTERFACES

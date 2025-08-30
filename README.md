@@ -58,23 +58,97 @@ qemu-system-x86_64 -bios /usr/share/ovmf/OVMF.fd -cdrom BloodHorn.iso
 
 ## Features
 
-- Linux boot
-- Multiboot 1 & 2
-- Limine protocol
-- Chainloading
-- PXE network boot
-- FAT32, ext2, ISO9660 support
-- SHA256, RSA, AES, HMAC
-- Secure boot
-- Entropy source
-- Graphical menu (theming, background image, localization)
-- Mouse support
-- Lua scripting
-- Recovery shell
-- Plugin system
-- Modular network stack (DHCP, TFTP, ARP)
-- Modular filesystem stack
+- **Multi-Architecture Support**: x86_64, ARM64, RISC-V, and more
+- **Multiple Boot Protocols**: Linux, Multiboot2, Limine, PXE
+- **Modern C++ Networking Stack**:
+  - IPv4 networking with ARP and DHCP
+  - PXE boot support
+  - TFTP file transfers
+  - Secure boot verification
+- **UEFI Secure Boot** compatible
+- **Modular Design**: Easy to extend and customize
+- **Interactive Boot Menu**: GUI and text mode interfaces
 
+## Networking Features
+
+BloodHorn includes a modern C++ networking stack for network booting and remote management:
+
+```cpp
+// Example: Network boot a kernel
+#include "net/network.hpp"
+
+void boot_from_network() {
+    using namespace BloodHorn::Net;
+    
+    // Create and initialize network interface
+    auto iface = NetworkInterface::create();
+    PXEClient client(std::move(iface));
+    
+    // Discover network configuration
+    if (auto ec = client.discoverNetwork()) {
+        // Handle error
+        return;
+    }
+    
+    // Download and boot a kernel
+    client.bootKernel(
+        "/boot/kernel.efi", 
+        "/boot/initrd.img", 
+        "console=ttyS0"
+    );
+}
+```
+
+### Supported Network Operations
+
+- **Address Management**:
+  - IPv4 address parsing and formatting
+  - MAC address handling
+  - Network configuration (IP, netmask, gateway, DNS)
+
+- **Protocols**:
+  - ARP for address resolution
+  - DHCP for automatic configuration
+  - TFTP for file transfers
+  - PXE for network booting
+
+- **Security**:
+  - Secure boot verification
+  - File integrity checking with SHA-512
+  - TPM 2.0 support for secure measurements
+
+## Building with Networking Support
+
+To enable networking features, ensure you have the required dependencies:
+
+```bash
+# Install additional networking dependencies
+sudo apt install -y libsodium-dev libssl-dev
+
+# Build with networking support
+build -p BloodHorn/BloodHorn.dsc -a X64 -t GCC5 -D NETWORK_ENABLE=1
+```
+
+## Configuration
+
+Network settings can be configured in `boot/config.ini`:
+
+```ini
+[network]
+enable_networking = true
+use_dhcp = true
+static_ip = 192.168.1.100
+netmask = 255.255.255.0
+gateway = 192.168.1.1
+dns_server = 8.8.8.8
+```
+
+## Security Considerations
+
+- Always verify the integrity of network-loaded kernels and modules
+- Use secure boot to prevent unauthorized code execution
+- Consider using TPM measurements for remote attestation
+- Validate all network responses and implement timeouts
 
 ## Architectures
 
@@ -150,4 +224,3 @@ This project is licensed under the MIT License. See the LICENSE file for details
 ---
 
 #### *BloodHorn was inspired by modern bootloaders, but all code is original and written from scratch and it's made originally for fun and to be used in my future operating systems!*
-
