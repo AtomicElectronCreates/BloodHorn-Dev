@@ -1,4 +1,3 @@
-
 # BloodHorn
 <p align="center">
   <img src="Zeak.png" alt="Project Logo" width="200">
@@ -103,13 +102,6 @@ qemu-system-x86_64 -bios /usr/share/ovmf/OVMF.fd -cdrom BloodHorn.iso
 - Theme and language options (see CONFIG.md)
 - Place config files in the root of the boot partition
 
-
-## Quick Start
-
-```bash
-make
-make test
-```
 
 
 ## Why We Don't Provide Binaries
