@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Install dependencies
       run: |
@@ -33,31 +33,33 @@ jobs:
         # Clone EDK2
         git clone --depth 1 https://github.com/tianocore/edk2.git
         cd edk2
-        git submodule update --init
+        
+        # Update submodules
+        git submodule update --init || { echo "Error: Failed to update EDK2 submodules"; exit 1; }
         
         # Build base tools
-        make -C BaseTools
+        make -C BaseTools || { echo "Error: Failed to build EDK2 BaseTools"; exit 1; }
         
         # Set up environment
         export EDK_TOOLS_PATH=$(pwd)/BaseTools
         export PACKAGES_PATH=$(pwd):$(pwd)/../
-        . edksetup.sh
+        . edksetup.sh || { echo "Error: Failed to set up EDK2 environment"; exit 1; }
         
         # Build BloodHorn
         cd ..
         cp -r BloodHorn edk2/
         cd edk2
-        build -a X64 -p BloodHorn.dsc -t GCC5
+        build -a X64 -p BloodHorn.dsc -t GCC12 || { echo "Error: Failed to build BloodHorn"; exit 1; }
         
         # Verify build output
-        if [ ! -f "Build/BloodHorn/DEBUG_GCC5/X64/BloodHorn.efi" ]; then
+        if [ ! -f "Build/BloodHorn/DEBUG_GCC12/X64/BloodHorn.efi" ]; then
           echo "Error: EFI binary not found"
           exit 1
         fi
         
         # Create output directory
         mkdir -p output/EFI/BOOT
-        cp Build/BloodHorn/DEBUG_GCC5/X64/BloodHorn.efi output/EFI/BOOT/BOOTX64.EFI
+        cp Build/BloodHorn/DEBUG_GCC12/X64/BloodHorn.efi output/EFI/BOOT/BOOTX64.EFI
         
         # Create test ISO
         xorriso -as mkisofs -e EFI/BOOT/BOOTX64.EFI -no-emul-boot -o BloodHorn.iso output/
@@ -65,14 +67,24 @@ jobs:
     - name: Test in QEMU
       run: |
         timeout 30s qemu-system-x86_64 \
-          -bios /usr/share/ovmf/OVMF.fd \
+          -bios /usr/share/OVMF/OVMF_CODE.fd \
           -cdrom BloodHorn.iso \
           -m 512 \
           -vga std \
           -nographic \
           -monitor none \
-          -serial stdio || \
-        (echo "QEMU test completed (timeout is expected)" && exit 0)
+          -serial stdio; \
+        QEMU_EXIT_CODE=$?; \
+        if [ $QEMU_EXIT_CODE -eq 124 ]; then \
+          echo "QEMU test completed (timeout is expected)"; \
+          exit 0; \
+        elif [ $QEMU_EXIT_CODE -eq 0 ]; then \
+          echo "QEMU test completed successfully"; \
+          exit 0; \
+        else \
+          echo "QEMU test failed with exit code $QEMU_EXIT_CODE"; \
+          exit $QEMU_EXIT_CODE; \
+        fi
     
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
@@ -80,4 +92,4 @@ jobs:
         name: bloodhorn-efi
         path: |
           BloodHorn.iso
-          edk2/Build/BloodHorn/DEBUG_GCC5/X64/BloodHorn.efi
+          edk2/Build/BloodHorn/DEBUG_GCC12/X64/BloodHorn.efi
