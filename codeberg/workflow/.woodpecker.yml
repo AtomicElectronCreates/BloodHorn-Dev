@@ -1,0 +1,73 @@
+# BloodHorn EDK2 Bootloader - Woodpecker CI Configuration for Codeberg
+
+variables:
+  - &edk2_base "edk2-stable202308"
+  - &ubuntu_image "ubuntu:22.04"
+
+steps:
+  # Install build dependencies
+  install-deps:
+    image: *ubuntu_image
+    commands:
+      - apt-get update
+      - apt-get install -y build-essential nasm gcc-multilib python3 uuid-dev git wget
+      - apt-get install -y gcc-mingw-w64-i686
+
+  # Setup EDK2
+  setup-edk2:
+    image: *ubuntu_image
+    depends_on: [install-deps]
+    commands:
+      - git clone https://github.com/tianocore/edk2.git --branch $EDK2_VERSION --depth 1
+      - cd edk2
+      - git submodule update --init
+      - make -C BaseTools
+      - export EDK_TOOLS_PATH=$(pwd)/BaseTools
+      - echo 'export EDK_TOOLS_PATH='$EDK2_TOOLS_PATH >> ~/.bashrc
+      - echo 'export PATH=$EDK_TOOLS_PATH/BinWrappers:$PATH' >> ~/.bashrc
+      - source ~/.bashrc
+      # Copy project files
+      - cp -r ../BloodHorn ./BloodHorn/
+
+  # Build for X64 (primary supported architecture)
+  build-x64:
+    image: *ubuntu_image
+    depends_on: [setup-edk2]
+    commands:
+      - cd edk2
+      - source ~/.bashrc
+      - cd BloodHorn
+      - build -p BloodHorn/BloodHorn.dsc -a X64 -b RELEASE -t GCC5
+      - echo "Build completed successfully"
+      - ls -la Build/BloodHorn/RELEASE_GCC5/X64/
+
+  # Build for ARM64 (if supported)
+  build-arm64:
+    image: *ubuntu_image
+    depends_on: [setup-edk2]
+    commands:
+      - cd edk2
+      - source ~/.bashrc
+      - cd BloodHorn
+      - build -p BloodHorn/BloodHorn.dsc -a AARCH64 -b RELEASE -t GCC5 || echo "ARM64 build failed or not supported"
+      - ls -la Build/BloodHorn/RELEASE_GCC5/AARCH64/ || echo "ARM64 build output not found"
+
+  # Validate build outputs
+  validate:
+    image: *ubuntu_image
+    depends_on: [build-x64, build-arm64]
+    commands:
+      - cd edk2/BloodHorn
+      - test -f Build/BloodHorn/RELEASE_GCC5/X64/BloodHorn.efi || exit 1
+      - echo "Build validation passed!"
+      - echo "Available build artifacts:"
+      - find Build/ -name "*.efi" -o -name "*.fd" | head -10
+
+# Trigger on pushes and pull requests to main branch
+when:
+  - event: [push, pull_request]
+    branch: main
+
+# Build matrix with EDK2 version
+matrix:
+  EDK2_VERSION: *edk2_base
