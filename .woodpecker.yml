@@ -1,63 +1,79 @@
-# BloodHorn EDK2 Bootloader - Woodpecker CI
-# Ready-to-go; no edits needed
+# SoftwaresForAll Native CI configuration for C written projects
+workspace:
+  base: /woodpecker
+  path: src/${CI_REPO}
 
-when:
-  event:
-    - push
-    - pull_request
-  branch:
-    - main
+matrix:
+  TOOLCHAIN:
+    - gcc-12
+    - clang-15
 
-variables:
-  EDK2_VERSION: "edk2-stable202308"
+environment:
+  BUILD_DIR: build
+  CMAKE_BUILD_TYPE: RelWithDebInfo
+  MAKEFLAGS: "-j$(nproc)"
 
 steps:
-  - name: install-deps
+  - name: setup-deps
     image: ubuntu:22.04
     commands:
-      # Install all required packages including git
-      - apt-get update && apt-get install -y git build-essential nasm gcc-multilib python3 uuid-dev wget gcc-mingw-w64-i686
+      - apt-get update -y
+      - apt-get install -y --no-install-recommends build-essential cmake git python3 pkg-config curl wget ca-certificates valgrind lcov cppcheck clang-tidy
+      - |
+        if echo "${TOOLCHAIN}" | grep -q clang; then
+          apt-get install -y clang;
+          export CC=clang;
+          export CXX=clang++;
+        else
+          apt-get install -y gcc g++;
+          export CC=gcc;
+          export CXX=g++;
+        fi
 
-  - name: setup-edk2
+  - name: configure
     image: ubuntu:22.04
-    depends_on: [install-deps]
     commands:
-      - git clone https://github.com/tianocore/edk2.git --branch ${EDK2_VERSION} --depth 1 edk2
-      - cd edk2
-      - git submodule update --init
-      - make -C BaseTools
-      - export EDK_TOOLS_PATH=$(pwd)/BaseTools
-      - export PATH=$EDK_TOOLS_PATH/BinWrappers:$PATH
-      - cp -r ../BloodHorn ./BloodHorn/
-      - echo "EDK2 setup complete"
+      - cmake -B ${BUILD_DIR} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_C_COMPILER=${CC}
 
-  - name: build-x64
+  - name: build
     image: ubuntu:22.04
-    depends_on: [setup-edk2]
     commands:
-      - cd edk2/BloodHorn
-      - export EDK_TOOLS_PATH=../BaseTools
-      - export PATH=$EDK_TOOLS_PATH/BinWrappers:$PATH
-      - build -p BloodHorn.dsc -a X64 -b RELEASE -t GCC5
-      - echo "Build X64 completed"
-      - ls -la Build/BloodHorn/RELEASE_GCC5/X64/
+      - cmake --build ${BUILD_DIR} --parallel
 
-  - name: build-arm64
+  - name: test
     image: ubuntu:22.04
-    depends_on: [setup-edk2]
     commands:
-      - cd edk2/BloodHorn
-      - export EDK_TOOLS_PATH=../BaseTools
-      - export PATH=$EDK_TOOLS_PATH/BinWrappers:$PATH
-      - build -p BloodHorn.dsc -a AARCH64 -b RELEASE -t GCC5 || echo "ARM64 build skipped"
-      - ls -la Build/BloodHorn/RELEASE_GCC5/AARCH64/ || echo "No ARM64 artifacts"
+      - cd ${BUILD_DIR}
+      - ctest --output-on-failure
 
-  - name: validate
+  - name: static-analysis
     image: ubuntu:22.04
-    depends_on: [build-x64, build-arm64]
     commands:
-      - cd edk2/BloodHorn
-      - test -f Build/BloodHorn/RELEASE_GCC5/X64/BloodHorn.efi || exit 1
-      - echo "Build validation passed!"
-      - echo "Available artifacts:"
-      - find Build/ -name "*.efi" -o -name "*.fd" | head -10
+      - cppcheck --enable=all --inconclusive --error-exitcode=1 .
+      - clang-tidy **/*.c -- -Iinclude -std=c11
+
+  - name: sanitizers
+    image: ubuntu:22.04
+    commands:
+      - cmake -B ${BUILD_DIR}_asan -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
+      - cmake --build ${BUILD_DIR}_asan
+      - ASAN_OPTIONS=detect_leaks=1 ./${BUILD_DIR}_asan/tests/test_suite || true
+
+  - name: valgrind
+    image: ubuntu:22.04
+    commands:
+      - valgrind --error-exitcode=1 --leak-check=full ./${BUILD_DIR}/tests/test_suite || true
+
+  - name: coverage
+    image: ubuntu:22.04
+    commands:
+      - cmake -B ${BUILD_DIR}_cov -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS="--coverage"
+      - cmake --build ${BUILD_DIR}_cov
+      - cd ${BUILD_DIR}_cov
+      - ctest || true
+      - lcov --capture --directory . --output-file coverage.info
+      - lcov --remove coverage.info '/usr/*' --output-file coverage.info
+      - genhtml coverage.info --output-directory coverage-report
+      - tar -czf coverage-report.tar.gz coverage-report
+    artifacts:
+      - coverage-report.tar.gz
