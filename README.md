@@ -13,6 +13,18 @@ If you like this project and want to support me, you can donate through [Liberap
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Platform](https://img.shields.io/badge/platform-x86__64%20%7C%20ARM64%20%7C%20RISC--V%20%7C%20LoongArch-blue)](https://codeberg.org/PacHashs/BloodHorn)
 
+## Project Background
+BloodHorn started as an experimental bootloader project aimed at simplifying the process of building and testing modern firmware-based systems.
+It was initially developed by Alexander Roman. Aka PacHashs as part of research into cross-architecture initialization and early-boot design.
+
+The idea behind BloodHorn came from the growing need for a clean, modular, and adaptable boot environment that supports multiple architectures and modern build systems without relying on legacy codebases.
+Most existing bootloaders are either heavily tied to a single platform, too complex to extend, or outdated in terms of design and structure.
+BloodHorn was created to address those limitations by focusing on clarity, maintainability, and modern development practices.
+
+While the project is still evolving, its long-term goal is to become a flexible and developer-friendly foundation for both experimental and production operating systems.
+It’s built with an emphasis on EDK2 standards, architecture abstraction, and transparent build configuration, allowing contributors to focus more on system logic and less on build friction.
+
+BloodHorn isn’t meant to compete with GRUB or existing loaders .it’s meant to serve as a modern reference implementation for anyone interested in understanding or developing firmware-level code in a clean and organized environment.
 ## Features
 - Architectures: x86_64, ARM64, RISC-V, LoongArch
 - Boot protocols: Linux, Multiboot 1/2, Limine, PXE, Chainloading
