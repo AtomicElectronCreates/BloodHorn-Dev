@@ -1,19 +1,21 @@
-# BloodHorn EDK2 Bootloader - Woodpecker CI Configuration
+\# BloodHorn EDK2 Bootloader - Woodpecker CI
+
+# Root-level triggers
+when:
+  event:
+    - push
+    - pull_request
+  branch:
+    - main
 
 # Variables
 variables:
   EDK2_VERSION: "edk2-stable202308"
-  UBUNTU_IMAGE: "ubuntu:22.04"
-
-# Workspace shared across steps
-workspace:
-  base: /drone/src
-  path: .
 
 steps:
-  # Install build dependencies
+  # Install dependencies
   install-deps:
-    image: ${UBUNTU_IMAGE}
+    image: ubuntu:22.04
     commands:
       - apt-get update
       - apt-get install -y build-essential nasm gcc-multilib python3 uuid-dev git wget
@@ -21,7 +23,7 @@ steps:
 
   # Setup EDK2
   setup-edk2:
-    image: ${UBUNTU_IMAGE}
+    image: ubuntu:22.04
     depends_on: [install-deps]
     commands:
       - git clone https://github.com/tianocore/edk2.git --branch ${EDK2_VERSION} --depth 1 edk2
@@ -33,9 +35,9 @@ steps:
       - cp -r ../BloodHorn ./BloodHorn/
       - echo "EDK2 setup complete"
 
-  # Build for X64
+  # Build X64
   build-x64:
-    image: ${UBUNTU_IMAGE}
+    image: ubuntu:22.04
     depends_on: [setup-edk2]
     commands:
       - cd edk2/BloodHorn
@@ -45,33 +47,24 @@ steps:
       - echo "Build X64 completed"
       - ls -la Build/BloodHorn/RELEASE_GCC5/X64/
 
-  # Build for ARM64 (optional)
+  # Build ARM64 (optional)
   build-arm64:
-    image: ${UBUNTU_IMAGE}
+    image: ubuntu:22.04
     depends_on: [setup-edk2]
     commands:
       - cd edk2/BloodHorn
       - export EDK_TOOLS_PATH=../BaseTools
       - export PATH=$EDK_TOOLS_PATH/BinWrappers:$PATH
-      - build -p BloodHorn.dsc -a AARCH64 -b RELEASE -t GCC5 || echo "ARM64 build failed or not supported"
-      - ls -la Build/BloodHorn/RELEASE_GCC5/AARCH64/ || echo "No ARM64 artifacts found"
-    allow_failure: true
+      - build -p BloodHorn.dsc -a AARCH64 -b RELEASE -t GCC5 || echo "ARM64 build skipped"
+      - ls -la Build/BloodHorn/RELEASE_GCC5/AARCH64/ || echo "No ARM64 artifacts"
 
-  # Validate artifacts
+  # Validate build
   validate:
-    image: ${UBUNTU_IMAGE}
+    image: ubuntu:22.04
     depends_on: [build-x64, build-arm64]
     commands:
       - cd edk2/BloodHorn
       - test -f Build/BloodHorn/RELEASE_GCC5/X64/BloodHorn.efi || exit 1
       - echo "Build validation passed!"
-      - echo "Artifacts:"
+      - echo "Available artifacts:"
       - find Build/ -name "*.efi" -o -name "*.fd" | head -10
-
-# Trigger pipeline on main branch
-trigger:
-  event:
-    - push
-    - pull_request
-  branch:
-    - main
