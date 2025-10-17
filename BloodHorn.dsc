@@ -22,3 +22,25 @@
 
 [Components]
   BloodHorn/BloodHorn.inf
+
+[PcdsFixedAtBuild]
+  # Coreboot platform configuration
+  gBloodHornTokenSpaceGuid.PcdCorebootEnabled|TRUE
+  gBloodHornTokenSpaceGuid.PcdCorebootTableAddress|0x500
+  gBloodHornTokenSpaceGuid.PcdCorebootFramebufferEnabled|TRUE
+
+  # Bootloader configuration
+  gBloodHornTokenSpaceGuid.PcdDefaultBootEntry|"linux"
+  gBloodHornTokenSpaceGuid.PcdMenuTimeout|10
+  gBloodHornTokenSpaceGuid.PcdTpmEnabled|TRUE
+  gBloodHornTokenSpaceGuid.PcdSecureBootEnabled|FALSE
+  gBloodHornTokenSpaceGuid.PcdGuiEnabled|TRUE
+
+[BuildOptions]
+  # Coreboot-specific build options
+  GCC:*_*_*_CC_FLAGS = -DCOREBOOT_PLATFORM -I$(WORKSPACE)/BloodHorn/coreboot
+
+[UserExtensions.TianoCore."ExtraFiles"]
+  # Coreboot platform files
+  BloodHorn/coreboot/coreboot_platform.h
+  BloodHorn/coreboot/coreboot_payload.h

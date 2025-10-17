@@ -10,6 +10,7 @@
 
 [Sources]
   main.c
+  main_coreboot.c
   net/arp.c
   net/dhcp.c
   net/net_utils.c
@@ -44,6 +45,8 @@
   config/config_json.c
   config/config_env.c
   BloodHorn.c
+  coreboot/coreboot_platform.c
+  coreboot/coreboot_payload.c
 
 [Sources.Common]
   net/network.hpp
@@ -52,6 +55,8 @@
   boot/libb/include/bloodhorn/input.h
   boot/libb/include/bloodhorn/filesystem.h
   boot/libb/include/bloodhorn/uefi.h
+  coreboot/coreboot_platform.h
+  coreboot/coreboot_payload.h
 
 [Packages]
   MdePkg/MdePkg.dec

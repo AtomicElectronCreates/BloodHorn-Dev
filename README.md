@@ -24,15 +24,19 @@ BloodHorn was created to address those limitations by focusing on clarity, maint
 While the project is still evolving, its long-term goal is to become a flexible and developer-friendly foundation for both experimental and production operating systems.
 It’s built with an emphasis on EDK2 standards, architecture abstraction, and transparent build configuration, allowing contributors to focus more on system logic and less on build friction.
 
+**Recent Development:** BloodHorn has been enhanced with comprehensive Coreboot firmware platform integration, providing a hybrid boot environment that leverages Coreboot's direct hardware control while maintaining UEFI compatibility for maximum flexibility and performance.
+
 BloodHorn isn’t meant to compete with GRUB or existing loaders .it’s meant to serve as a modern reference implementation for anyone interested in understanding or developing firmware-level code in a clean and organized environment.
 ## Features
 - Architectures: x86_64, ARM64, RISC-V, LoongArch
-- Boot protocols: Linux, Multiboot 1/2, Limine, PXE, Chainloading
+- Boot protocols: Linux, Multiboot 1/2, Limine, PXE, Chainloading, BloodChain
 - Filesystems: FAT32, ext2/3/4
 - Security: Secure Boot, TPM 2.0, file verification
 - Network: PXE, TFTP, DHCP
 - UI: Text and graphical modes
 - Extensions: Lua scripting
+- **Firmware Support:** UEFI and Coreboot hybrid architecture with automatic detection
+- **Hardware Integration:** Direct hardware control via Coreboot + UEFI service compatibility
 
 ## Building
 1. Install EDK2 and required toolchain
@@ -47,8 +51,12 @@ BloodHorn isn’t meant to compete with GRUB or existing loaders .it’s meant t
    - config.json for JSON format
    - Environment variables are also supported
 
+**Coreboot Integration:** BloodHorn automatically detects and adapts to Coreboot firmware when running as a payload, providing enhanced hardware control and performance while maintaining UEFI compatibility.
+
 ## Documentation
 See docs/ and other markdowns for detailed information on protocols and APIs.
+
+**Coreboot Integration:** For detailed information about BloodHorn's Coreboot firmware integration, see `docs/COREBOOT_INTEGRATION.md`.
 
 ## FAQ
 
@@ -60,6 +68,9 @@ Contributions are welcome! Please see our contribution guidelines in the docs/ d
 
 ### Does BloodHorn support Secure Boot?
 Yes, BloodHorn includes comprehensive Secure Boot support with TPM 2.0 integration and cryptographic verification of all loaded modules.
+
+### Does BloodHorn support Coreboot firmware?
+Yes, BloodHorn features comprehensive Coreboot firmware integration with automatic detection and hybrid initialization. When running as a Coreboot payload, it leverages Coreboot's direct hardware control for enhanced performance while maintaining UEFI compatibility for broader system support.
 
 ## Contributors
 

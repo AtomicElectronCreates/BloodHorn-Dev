@@ -1,0 +1,67 @@
+#
+# BloodHorn Coreboot Configuration
+# Configured for generic x86_64 mainboard with BloodHorn payload
+#
+
+# Mainboard configuration
+CONFIG_MAINBOARD_DIR="mainboard/google/octopus"
+CONFIG_MAINBOARD_PART_NUMBER="Octopus"
+
+# CPU configuration
+CONFIG_CPU_SPECIFIC_OPTIONS=y
+CONFIG_CPU_MICROCODE_CBFS_EXTERNAL=y
+
+# Memory configuration
+CONFIG_DRAM_SIZE_MB=8192
+CONFIG_BOOTBLOCK_SIMPLE_DRAM=y
+
+# Graphics configuration
+CONFIG_FRAMEBUFFER_KEEP_VESA_MODE=n
+CONFIG_MAINBOARD_HAS_NATIVE_VGA_INIT=y
+
+# Payload configuration
+CONFIG_PAYLOAD_ELF=y
+CONFIG_PAYLOAD_FILE="../build/bloodhorn.elf"
+CONFIG_PAYLOAD_CMDLINE="console=ttyS0 root=/dev/sda1 ro quiet splash"
+
+# Security configuration
+CONFIG_TPM=y
+CONFIG_TPM_PPI=y
+CONFIG_TPM_MEASURED_BOOT=y
+CONFIG_VBOOT=y
+CONFIG_VBOOT_VERIFY_FIRMWARE=y
+
+# Device support
+CONFIG_USB=y
+CONFIG_USB_XHCI=y
+CONFIG_SATA=y
+CONFIG_NVME=y
+CONFIG_PCIEXP=y
+
+# Network support
+CONFIG_NET=y
+CONFIG_NET_COREBOOT=y
+
+# Console configuration
+CONFIG_CONSOLE_SERIAL=y
+CONFIG_CONSOLE_SERIAL_115200=y
+CONFIG_CONSOLE_VGA=y
+
+# ACPI configuration
+CONFIG_ACPI=y
+CONFIG_ACPI_SSDT=y
+
+# SMBIOS configuration
+CONFIG_SMBIOS=y
+
+# Build options
+CONFIG_USE_BLOBS=y
+CONFIG_USE_BLOB_1MB=1
+
+# Coreboot options
+CONFIG_COMPRESS_RAMSTAGE=y
+CONFIG_HAVE_ACPI_RESUME=y
+
+# Development options
+CONFIG_COLLECT_TIMESTAMPS=y
+CONFIG_USE_OPTION_TABLE=y
