@@ -36,6 +36,48 @@ After building BloodHorn (see INSTALL.md for build instructions), you can use th
 - Chainload other bootloaders or operating systems.
 - Boot over network (PXE/HTTP).
 
+## Coreboot Integration
+
+BloodHorn provides two ways to work with Coreboot:
+
+## Coreboot Integration
+
+BloodHorn integrates with Coreboot through the following components:
+
+### 1. CorebootPayloadPkg
+Located in `Edk2BHModules/CorebootPayloadPkg/`, this package provides:
+- Coreboot table parsing and interpretation
+- Coreboot services for other BloodHorn components
+- Hardware initialization specific to Coreboot
+
+**Key Components**:
+- `CorebootPayloadLib`: Main library for Coreboot payload support
+- `CorebootCompatLib`: Compatibility layer for existing Coreboot code
+
+### 2. Coreboot Support in BloodHorn
+- The `coreboot/` directory contains platform-specific code
+- Coreboot tables and system information are made available
+- UEFI-compatible services are provided on top of Coreboot
+
+**Building with Coreboot Support**:
+```bash
+# Build BloodHorn with Coreboot support
+build -p BloodHorn.dsc -b RELEASE -t GCC5 -a X64 -D COREBOOT_ENABLED=1
+```
+
+**Note**: The `COREBOOT_ENABLED` flag is used to conditionally include Coreboot-specific code in the build.
+
+**Configuration**:
+- Set `COREBOOT_ENABLED=1` to enable Coreboot support
+- Configure Coreboot-specific settings in `bloodhorn.json`
+- Use UEFI variables for dynamic configuration
+
+**Troubleshooting**:
+- If Coreboot tables aren't found:
+  - Verify the system is booting in the correct mode (UEFI/BIOS)
+  - Check Coreboot payload initialization
+  - Verify memory regions are correctly mapped
+
 ---
 
 # BloodHorn Usage Guide

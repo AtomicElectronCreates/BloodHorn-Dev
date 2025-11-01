@@ -13,6 +13,25 @@ The CorebootPayloadPkg provides the necessary infrastructure to run EDK2-based
 firmware as a Coreboot payload. This package handles the integration between
 Coreboot's native environment and the UEFI/PI environment expected by EDK2.
 
+Relationship with coreboot/ Directory
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+This package works in conjunction with the ``coreboot/`` directory in the root of the repository:
+
+- **CorebootPayloadPkg (this package)**:
+  - Handles the EDK2 side of Coreboot integration
+  - Manages the UEFI environment when running as a Coreboot payload
+  - Follows EDK2 package structure and build system
+
+- **coreboot/ directory**:
+  - Contains Coreboot-specific code and configurations
+  - Handles the Coreboot side of the integration
+  - Part of the main BloodHorn build system
+
+This separation allows for a clean architecture where:
+1. CorebootPayloadPkg focuses on UEFI/PI compatibility
+2. The coreboot/ directory handles platform-specific Coreboot integration
+3. Each component follows its respective build system and conventions
+
 Features
 --------
 - **Automatic Detection**: Automatically detects when running as a Coreboot payload
