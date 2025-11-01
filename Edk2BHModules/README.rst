@@ -7,19 +7,45 @@ EDK2 Modules for BloodHorn
 
 Overview
 --------
-This directory contains a modified version of the `EDK2 (EFI Development Kit II) <https://github.com/tianocore/edk2>`_ framework, specifically tailored for the BloodHorn bootloader. The original EDK2 code has been customized to better suit the needs of BloodHorn while maintaining compatibility with the UEFI specification.
+This directory contains a modified version of the `EDK2 (EFI Development Kit II) <https://github.com/tianocore/edk2>`_ framework, customized for the BloodHorn bootloader. These modifications provide essential UEFI services and hardware abstraction while maintaining compatibility with the UEFI specification.
 
-Modifications from Upstream EDK2
---------------------------------
+Key Components
+--------------
 
-Core Changes
-~~~~~~~~~~~~
-- **Code Optimization**: Critical paths have been optimized and packages/modules we're stripped for more compatibility  for faster boot times
-- **Coreboot Integration**: Improved support for Coreboot as a payload
-- **BloodHorn-Specific Drivers**: Custom drivers for BloodHorn's hardware support
+Core Packages
+~~~~~~~~~~~~~
+- **MdePkg**: Core UEFI package with base definitions and libraries
+- **MdeModulePkg**: Standard UEFI module implementations
+- **CryptoPkg**: Cryptographic services and algorithms
 
-Structure
----------
+BloodHorn-Specific Additions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- **CorebootPayloadPkg**: Support for Coreboot integration
+- **Custom Build Tools**: Modified build system for BloodHorn's requirements
+
+Building
+--------
+To build BloodHorn with these EDK2 modules:
+
+1. Set up the build environment:
+
+   .. code-block:: bash
+
+       # Initialize the EDK2 environment
+       . edksetup.sh
+
+2. Build BloodHorn:
+
+   .. code-block:: bash
+
+       # For x86_64 with GCC
+       build -p BloodHorn.dsc -a X64 -b RELEASE -t GCC5
+
+       # For ARM64 with GCC
+       build -p BloodHorn.dsc -a AARCH64 -b RELEASE -t GCC5
+
+Directory Structure
+------------------
 ::
 
     Edk2BHModules/
@@ -27,23 +53,13 @@ Structure
     ├── MdePkg/            # Core UEFI package
     ├── MdeModulePkg/      # UEFI module implementations
     ├── CryptoPkg/         # Cryptographic services
-    └── SecurityPkg/       # Security-related modules
-
-Building
---------
-To build BloodHorn with these modified EDK2 modules:
-
-.. code-block:: bash
-
-    # Set up the build environment
-    source edksetup.sh
-
-    # Build the target platform
-    build -p BloodHornPkg/BloodHorn.dsc -a X64 -b RELEASE -t GCC5
+    ├── EmbeddedPkg/       # Embedded platform support
+    ├── UefiCpuPkg/        # CPU-specific UEFI drivers
+    └── CorebootPayloadPkg/ # Coreboot integration support
 
 License
 -------
 This modified EDK2 code is distributed under the `BSD-2-Clause-Patent License <https://opensource.org/licenses/BSDplusPatent>`_, the same as the original EDK2 project.
 
 .. note::
-    This is a modified version of EDK2. For the original, unmodified source, please visit the `official EDK2 repository <https://github.com/tianocore/edk2>`.
+    This is a modified version of EDK2. For the original source, visit the `official EDK2 repository <https://github.com/tianocore/edk2>`.
