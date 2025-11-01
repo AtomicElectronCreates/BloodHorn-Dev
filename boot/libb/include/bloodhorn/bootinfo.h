@@ -16,9 +16,13 @@ extern "C" {
 
 // Boot information version
 #define BH_BOOTINFO_VERSION_MAJOR   1
-#define BH_BOOTINFO_VERSION_MINOR   0
+#define BH_BOOTINFO_VERSION_MINOR   1
 #define BH_BOOTINFO_VERSION_PATCH   0
 #define BH_BOOTINFO_SIGNATURE       0x424F4F5452464E49ULL  // "INFOBOOT"
+
+// Coreboot table signatures
+#define CB_HEADER_SIGNATURE  0x4F49424C  // 'LBIO'
+#define CB_TABLE_SIGNATURE   0x4F49424C  // 'LBIO'
 
 // Boot loader types
 typedef enum {
@@ -486,8 +490,135 @@ const char* bh_architecture_to_string(bh_architecture_t arch);
 const char* bh_boot_method_to_string(bh_boot_method_t method);
 const char* bh_module_type_to_string(bh_module_type_t type);
 
+// Coreboot table types
+typedef enum {
+    CB_TAG_UNUSED = 0,
+    CB_TAG_MEMORY = 1,
+    CB_TAG_HWRPB = 2,
+    CB_TAG_MAINBOARD = 3,
+    CB_TAG_VERSION = 4,
+    CB_TAG_EXTRA_VERSION = 5,
+    CB_TAG_BUILD = 6,
+    CB_TAG_COMPILE_TIME = 7,
+    CB_TAG_COMPILE_BY = 8,
+    CB_TAG_COMPILE_HOST = 9,
+    CB_TAG_COMPILE_DOMAIN = 10,
+    CB_TAG_COMPILER = 11,
+    CB_TAG_LINKER = 12,
+    CB_TAG_ASSEMBLER = 13,
+    CB_TAG_LOCATION = 14,
+    CB_TAG_SERIAL = 17,
+    CB_TAG_CONSOLE = 17,
+    CB_TAG_FORWARD = 18,
+    CB_TAG_FRAMEBUFFER = 19,
+    CB_TAG_GPIO = 20,
+    CB_TAG_TIMESTAMPS = 21,
+    CB_TAG_CBMEM_CONSOLE = 22,
+    CB_TAG_MRC_CACHE = 23,
+    CB_TAG_ACPI_GNVS = 24,
+    CB_TAG_BOARD_ID = 25,
+    CB_TAG_BOOT_MEDIA_PARAMS = 26,
+    CB_TAG_CB_MEMORY = 27,
+    CB_TAG_VBNV = 28,
+    CB_TAG_CMOS_OPTION_TABLE = 29,
+    CB_TAG_OPTION = 30,
+    CB_TAG_OPTION_ENUM = 31,
+    CB_TAG_OPTION_DEFAULTS = 32,
+    CB_TAG_OPTION_CHECKSUM = 33,
+    CB_TAG_MAX = 34
+} bh_coreboot_tag_t;
+
+// Coreboot memory range
+typedef struct {
+    bh_uint64_t start;
+    bh_uint64_t size;
+    bh_uint32_t type;
+} bh_coreboot_memory_range_t;
+
+// Coreboot table header
+typedef struct {
+    bh_uint32_t signature;
+    bh_uint32_t header_bytes;
+    bh_uint32_t header_checksum;
+    bh_uint32_t table_bytes;
+    bh_uint32_t table_checksum;
+    bh_uint32_t table_entries;
+} bh_coreboot_table_t;
+
+// Coreboot RSDP (Root System Description Pointer)
+typedef struct {
+    char signature[8];
+    bh_uint8_t checksum;
+    char oem_id[6];
+    bh_uint8_t revision;
+    bh_uint32_t rsdt_address;
+    bh_uint32_t length;
+    bh_uint64_t xsdt_address;
+    bh_uint8_t extended_checksum;
+    bh_uint8_t reserved[3];
+} __attribute__((packed)) bh_coreboot_rsdp_t;
+
+// Coreboot memory types
+typedef enum {
+    CB_MEM_RAM = 1,
+    CB_MEM_RESERVED = 2,
+    CB_MEM_ACPI = 3,
+    CB_MEM_NVS = 4,
+    CB_MEM_UNUSABLE = 5,
+    CB_MEM_VENDOR_RSVD = 6,
+    CB_MEM_TABLE = 16,
+} bh_coreboot_memory_type_t;
+
+// Coreboot framebuffer information
+typedef struct {
+    bh_uint64_t physical_address;
+    bh_uint32_t x_resolution;
+    bh_uint32_t y_resolution;
+    bh_uint32_t bytes_per_line;
+    bh_uint8_t bits_per_pixel;
+    bh_uint8_t red_mask_pos;
+    bh_uint8_t red_mask_size;
+    bh_uint8_t green_mask_pos;
+    bh_uint8_t green_mask_size;
+    bh_uint8_t blue_mask_pos;
+    bh_uint8_t blue_mask_size;
+    bh_uint8_t reserved_mask_pos;
+    bh_uint8_t reserved_mask_size;
+} bh_coreboot_framebuffer_t;
+
+// Coreboot table entry
+typedef struct {
+    bh_uint32_t tag;
+    bh_uint32_t size;
+} bh_coreboot_header_t;
+
+// Coreboot memory map entry
+typedef struct {
+    bh_coreboot_header_t header;
+    bh_uint64_t memory_map[];
+} bh_coreboot_memory_map_t;
+
+// Coreboot framebuffer entry
+typedef struct {
+    bh_coreboot_header_t header;
+    bh_coreboot_framebuffer_t framebuffer;
+} bh_coreboot_framebuffer_entry_t;
+
+// Coreboot RSDP entry
+typedef struct {
+    bh_coreboot_header_t header;
+    bh_coreboot_rsdp_t rsdp;
+} bh_coreboot_rsdp_entry_t;
+
+// Coreboot functions
+bh_status_t bh_coreboot_get_table(bh_coreboot_table_t** table);
+bh_status_t bh_coreboot_get_memory_map(bh_coreboot_memory_range_t** ranges, bh_size_t* count);
+bh_status_t bh_coreboot_find_tag(bh_coreboot_tag_t tag, void** data, bh_size_t* size);
+bh_status_t bh_coreboot_get_framebuffer(bh_coreboot_framebuffer_t** fb);
+bh_status_t bh_coreboot_get_rsdp(bh_coreboot_rsdp_t** rsdp);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif // BLOODHORN_BOOTINFO_H
+#endif /* BLOODHORN_BOOTINFO_H */

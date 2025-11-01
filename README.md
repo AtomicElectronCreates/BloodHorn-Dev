@@ -49,37 +49,41 @@ If you like this project and want to support me, you can donate through [Liberap
 
 ### Building from Source
 
+#### Prerequisites
+- Git
+- Python 3.7 or later
+- C/C++ toolchain (GCC/Clang on Linux/macOS, MSVC on Windows)
+- EDK2 BaseTools (included in Edk2BHModules)
+- NASM (for assembly components)
+- iASL (for ACPI support)
+
 #### Linux/macOS
 ```bash
 git clone --recursive https://codeberg.org/PacHashs/BloodHorn.git
 cd BloodHorn
+# Build BaseTools if not already built
+make -C Edk2BHModules/BaseTools
+# Set up build environment
+source edksetup.sh
+# Build BloodHorn (Release)
+build -p BloodHorn.dsc -b RELEASE -t GCC5 -a X64 -n $(nproc)
+# Or for Debug build with Coreboot support
+# build -p BloodHorn.dsc -b DEBUG -t GCC5 -a X64 -n $(nproc) -D COREBOOT_ENABLED=1
 ```
 
 #### Windows
 ```cmd
 git clone --recursive https://codeberg.org/PacHashs/BloodHorn.git
 cd BloodHorn
-```
-
-### Installing BloodHorn
-### Building BloodHorn
-
-#### Linux/macOS
-```bash
-# Release build
-build -p BloodHorn.dsc -b RELEASE -t GCC5 -a X64
-
-# Debug build
-build -p BloodHorn.dsc -b DEBUG -t GCC5 -a X64
-```
-
-#### Windows
-```cmd
-:: Release build
+:: Build BaseTools if not already built
+cd Edk2BHModules\BaseTools
+nmake
+cd ..\..
+:: Set up environment (run from Visual Studio x64 Native Tools Command Prompt)
+:: Build BloodHorn (Release)
 build -p BloodHorn.dsc -b RELEASE -t VS2019 -a X64
-
-:: Debug build
-build -p BloodHorn.dsc -b DEBUG -t VS2019 -a X64
+:: Or for Debug build with Coreboot support
+:: build -p BloodHorn.dsc -b DEBUG -t VS2019 -a X64 -D COREBOOT_ENABLED=1
 ```
 
 Output files:
@@ -143,111 +147,41 @@ BloodHorn/
    kernel = /boot/vmlinuz
    initrd = /boot/initrd.img
    cmdline = root=/dev/sda1 ro quiet
-   ```
-
-5. **Optional but Fancy**:
-   - Localization: `\locales\en.ini`
-   - Fancy fonts: `/fonts/ter-16n.psf`
-   - Your favorite OS (we don't judge... much)
-## Features That Make GRUB Look Like a Dial-Up Connection
-
-- **Architectures**: x86_64, ARM64, RISC-V, LoongArch - Like a UN meeting, but for your computer's soul
-- **Protocols**: Linux, Multiboot 1/2, Limine, Chainload, PXE, BloodChain - More protocols than your ex has excuses
-- **Security**: Secure Boot, TPM 2.0, file verification - We've got more layers than an onion (and might make you cry less)
-- **Config**: INI/JSON/UEFI vars - Because one way to do things is boring, and three is a party
-- **UI**: Text/graphical with localization - Now with 100% fewer "grub>" prompts that make you question your life choices
-- **Firmware**: Coreboot + UEFI hybrid - Like peanut butter and chocolate, but for your firmware
 - **Recovery Mode**: For when you thought "rm -rf /" was a good idea at 3 AM
 - **Boot Speed**: Faster than you can say "I'll just check Reddit while I wait"
 
-## Project Structure (Where the Magic Happens)
+## Coreboot Integration
 
-```
-BloodHorn/
-├── BloodHorn.dsc       # Main build configuration
-├── BloodHorn.fdf       # FD image layout
-├── BloodHorn.inf       # Module information
-├── coreboot/           # Coreboot integration
-├── uefi/              # UEFI-specific code
-├── security/          # TPM, Secure Boot, and other fun stuff
-├── fs/                # Filesystem support
-├── net/               # Network booting (for when you're feeling brave)
-└── plugins/           # Because why not make it more complicated?
+BloodHorn features comprehensive Coreboot firmware integration through the CorebootPayloadPkg. When built with Coreboot support, it provides:
 
-# EDK2 Components We've Adopted
-├── MdeModulePkg/      # Because we're not masochists
-├── CryptoPkg/         # For when you need to encrypt your bootloader's diary
-├── EmbeddedPkg/       # For that embedded feeling
-└── BaseTools/         # The unsung heroes of the build process
+- **Automatic Detection**: Automatically detects when running as a Coreboot payload
+- **Hybrid Initialization**: Leverages Coreboot's hardware initialization while maintaining UEFI compatibility
+- **Memory Management**: Proper handling of Coreboot memory maps and tables
+- **Hardware Access**: Direct access to Coreboot-provided hardware information
+- **Performance**: Optimized boot path when running on Coreboot
+
+### Building with Coreboot Support
+
+To enable Coreboot payload support, use the `COREBOOT_ENABLED` flag during build:
+
+```bash
+build -p BloodHorn.dsc -b RELEASE -t GCC5 -a X64 -D COREBOOT_ENABLED=1
 ```
 
-## Advanced Configuration
+### CorebootPayloadPkg
 
-### Coreboot Integration
-BloodHorn and Coreboot go together like peanut butter and chocolate (if they were both made of code):
-- Auto-detects Coreboot firmware
-- Uses Coreboot tables when available
-- Falls back to UEFI services when needed
+The CorebootPayloadPkg provides the following features:
+- Coreboot table parsing and validation
+- Memory map translation between Coreboot and UEFI formats
+- Hardware information extraction from Coreboot tables
+- Integration with the main BloodHorn bootloader
 
-### Secure Boot (For the Paranoid)
-```ini
-[security]
-secure_boot = true
-tpm_support = true
-key_file = /path/to/your/key.pem
-```
-
-### Network Boot (Because Local Storage is So 2020)
-```ini
-[network]
-pxe_enabled = true
-tftp_server = 192.168.1.100
-boot_file = /pxelinux.0
-```
-
-**Coreboot Integration:** BloodHorn automatically detects and adapts to Coreboot firmware when running as a payload, providing enhanced hardware control and performance while maintaining UEFI compatibility.
-
-## Documentation
-- `docs/Overview.md` – high-level overview
-- `docs/Configuration.md` – all config options (themes, fonts, locales, entries)
-- `docs/Boot-Protocols.md` – supported protocols
-- `docs/COREBOOT_INTEGRATION.md` – hybrid mode details
-
-**Coreboot Integration:** For detailed information about BloodHorn's Coreboot firmware integration, see `docs/COREBOOT_INTEGRATION.md`.
-
-## Why BloodHorn? (Asking for a Friend)
-
-### You'll Love BloodHorn If You've Ever:
-- Wanted to high-five your bootloader (metaphorically, please don't touch the screen)
-- Thought "I wish this boot process had more personality"
-- Wasted hours configuring GRUB only to get a blinking cursor
-- Wanted to feel like a hacker without actually having to hack anything
-
-### Choose BloodHorn When:
-- **You value your time** - Boots faster than you can say "I'll just check my phone"
-- **You like options** - More configuration choices than a hipster coffee shop
-- **You make mistakes** - Recovery mode that doesn't judge (much)
-- **You're not a morning person** - Because neither are we
-
-### Stick With GRUB If You:
-- Enjoy typing commands that look like they're in Klingon
-- Think booting should be a social activity (with all that waiting around)
-- Believe "minimalist" means "I like staring at a command prompt"
-- Have a poster of Linus Torvalds on your wall (we see you)
-
-### Real Developers (and Their Computers) Love BloodHorn
-- **For the rebels** who think "standards are just suggestions"
-- **For the optimists** who think "it worked once, ship it!"
-- **For the realists** who know they'll be debugging this at 2 AM
-- **For the dreamers** who believe one day their code will be as cool as BloodHorn
-
-> *"I used to have a life. Then I found BloodHorn. Now I spend all my time booting things just for fun."*  
-> — Probably someone, somewhere, hopefully
+For more details, see the [CorebootPayloadPkg documentation](Edk2BHModules/CorebootPayloadPkg/README.rst).
 
 ## FAQ
 
 ### What is the size of BloodHorn?
-BloodHorn source code is approximately 500 KB before compilation. After building, the bootloader binary ranges from 1.5 to 2 MB depending on enabled features and architecture.
+The BloodHorn source code is approximately 14 MiB. After compilation, the bootloader binary can grow up to 30 MiB, depending on the enabled features, optimizations, and target architecture. The size may vary based on the build configuration and included modules.
 
 ### How do I contribute to BloodHorn?
 Contributions are welcome! Please see our contribution guidelines in the docs/ directory and feel free to open issues or submit pull requests on our Codeberg repository.

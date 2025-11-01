@@ -12,45 +12,51 @@
 
 [LibraryClasses]
   # Basic UEFI Libraries
-  UefiLib                 = MdePkg/Library/UefiLib/UefiLib.inf
-  UefiApplicationEntryPoint = MdePkg/Library/UefiApplicationEntryPoint/UefiApplicationEntryPoint.inf
-  UefiBootServicesTableLib = MdePkg/Library/UefiBootServicesTableLib/UefiBootServicesTableLib.inf
-  UefiRuntimeServicesTableLib = MdePkg/Library/UefiRuntimeServicesTableLib/UefiRuntimeServicesTableLib.inf
+  UefiLib                 = Edk2BHModules/MdePkg/Library/UefiLib/UefiLib.inf
+  UefiApplicationEntryPoint = Edk2BHModules/MdePkg/Library/UefiApplicationEntryPoint/UefiApplicationEntryPoint.inf
+  UefiBootServicesTableLib = Edk2BHModules/MdePkg/Library/UefiBootServicesTableLib/UefiBootServicesTableLib.inf
+  UefiRuntimeServicesTableLib = Edk2BHModules/MdePkg/Library/UefiRuntimeServicesTableLib/UefiRuntimeServicesTableLib.inf
   
   # Core Libraries
-  BaseLib                 = MdePkg/Library/BaseLib/BaseLib.inf
-  BaseMemoryLib           = MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
-  DebugLib                = MdePkg/Library/BaseDebugLibNull/BaseDebugLibNull.inf
-  DebugPrintErrorLevelLib  = MdePkg/Library/BaseDebugPrintErrorLevelLib/BaseDebugPrintErrorLevelLib.inf
+  BaseLib                 = Edk2BHModules/MdePkg/Library/BaseLib/BaseLib.inf
+  BaseMemoryLib           = Edk2BHModules/MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
+  DebugLib                = Edk2BHModules/MdePkg/Library/BaseDebugLibNull/BaseDebugLibNull.inf
+  DebugPrintErrorLevelLib  = Edk2BHModules/MdePkg/Library/BaseDebugPrintErrorLevelLib/BaseDebugPrintErrorLevelLib.inf
   
   # Memory Management
-  MemoryAllocationLib     = MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
-  DxeServicesTableLib     = MdePkg/Library/DxeServicesTableLib/DxeServicesTableLib.inf
+  MemoryAllocationLib     = Edk2BHModules/MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
+  DxeServicesTableLib     = Edk2BHModules/MdePkg/Library/DxeServicesTableLib/DxeServicesTableLib.inf
   
   # PCD and Configuration
-  PcdLib                  = MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
+  PcdLib                  = Edk2BHModules/MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
   
   # String and Print
-  PrintLib                = MdePkg/Library/BasePrintLib/BasePrintLib.inf
+  PrintLib                = Edk2BHModules/MdePkg/Library/BasePrintLib/BasePrintLib.inf
   
   # Platform Specific
-  DebugAgentLib           = MdeModulePkg/Library/DebugAgentLibNull/DebugAgentLibNull.inf
+  DebugAgentLib           = Edk2BHModules/MdeModulePkg/Library/DebugAgentLibNull/DebugAgentLibNull.inf
   
   # For Coreboot integration
   CorebootLib             = BloodHorn/Coreboot/Library/CorebootLib/CorebootLib.inf
   
+  # Coreboot Payload Support
+  CorebootPayloadLib|Edk2BHModules/CorebootPayloadPkg/Library/CorebootPayloadLib/CorebootPayloadLib.inf
+  
   # Security Libraries
-  BaseCryptLib            = CryptoPkg/Library/BaseCryptLib/BaseCryptLib.inf
-  Tpm2DeviceLib           = SecurityPkg/Library/Tpm2DeviceLibDTpm/Tpm2DeviceLibDTpm.inf
+  BaseCryptLib            = Edk2BHModules/CryptoPkg/Library/BaseCryptLib/BaseCryptLib.inf
+  Tpm2DeviceLib           = Edk2BHModules/SecurityPkg/Library/Tpm2DeviceLibDTpm/Tpm2DeviceLibDTpm.inf
 
 [Packages]
   # Core EDK2 Packages
-  MdePkg/MdePkg.dec
-  MdeModulePkg/MdeModulePkg.dec
+  Edk2BHModules/MdePkg/MdePkg.dec
+  Edk2BHModules/MdeModulePkg/MdeModulePkg.dec
+  
+  # Coreboot Integration
+  Edk2BHModules/CorebootPayloadPkg/CorebootPayloadPkg.dec
   
   # Security Packages
-  CryptoPkg/CryptoPkg.dec
-  SecurityPkg/SecurityPkg.dec
+  Edk2BHModules/CryptoPkg/CryptoPkg.dec
+  Edk2BHModules/SecurityPkg/SecurityPkg.dec
   
   # Platform Specific
   BloodHorn/BloodHorn.dec
@@ -62,28 +68,34 @@
   # Coreboot Support
   BloodHorn/Coreboot/Library/CorebootLib/CorebootLib.inf
   
+  # Coreboot Payload Support
+  Edk2BHModules/CorebootPayloadPkg/Library/CorebootPayloadLib/CorebootPayloadLib.inf {
+    <PcdsFixedAtBuild>
+      gCorebootPayloadPkgTokenSpaceGuid.PcdCorebootTableAddress|0x0
+  }
+  
   # Required UEFI Drivers
-  MdeModulePkg/Universal/PCD/Dxe/Pcd.inf
-  MdeModulePkg/Core/Dxe/DxeMain.inf
-  MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf
-  MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf
+  Edk2BHModules/MdeModulePkg/Universal/PCD/Dxe/Pcd.inf
+  Edk2BHModules/MdeModulePkg/Core/Dxe/DxeMain.inf
+  Edk2BHModules/MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf
+  Edk2BHModules/MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf
   
   # Console Support
-  MdeModulePkg/Universal/Console/ConPlatformDxe/ConPlatformDxe.inf
-  MdeModulePkg/Universal/Console/ConSplitterDxe/ConSplitterDxe.inf
-  MdeModulePkg/Universal/Console/GraphicsConsoleDxe/GraphicsConsoleDxe.inf
-  MdeModulePkg/Universal/Console/TerminalDxe/TerminalDxe.inf
+  Edk2BHModules/MdeModulePkg/Universal/Console/ConPlatformDxe/ConPlatformDxe.inf
+  Edk2BHModules/MdeModulePkg/Universal/Console/ConSplitterDxe/ConSplitterDxe.inf
+  Edk2BHModules/MdeModulePkg/Universal/Console/GraphicsConsoleDxe/GraphicsConsoleDxe.inf
+  Edk2BHModules/MdeModulePkg/Universal/Console/TerminalDxe/TerminalDxe.inf
   
   # File System Support
-  MdeModulePkg/Universal/Disk/DiskIoDxe/DiskIoDxe.inf
-  MdeModulePkg/Universal/Disk/PartitionDxe/PartitionDxe.inf
-  MdeModulePkg/Universal/Disk/UnicodeCollation/EnglishDxe/EnglishDxe.inf
+  Edk2BHModules/MdeModulePkg/Universal/Disk/DiskIoDxe/DiskIoDxe.inf
+  Edk2BHModules/MdeModulePkg/Universal/Disk/PartitionDxe/PartitionDxe.inf
+  Edk2BHModules/MdeModulePkg/Universal/Disk/UnicodeCollation/EnglishDxe/EnglishDxe.inf
   
   # FAT File System
-  FatPkg/EnhancedFatDxe/Fat.inf
+  Edk2BHModules/FatPkg/EnhancedFatDxe/Fat.inf
   
   # BDS (Boot Device Selection)
-  MdeModulePkg/Universal/BdsDxe/BdsDxe.inf
+  Edk2BHModules/MdeModulePkg/Universal/BdsDxe/BdsDxe.inf
 
 [PcdsFixedAtBuild]
   # Coreboot platform configuration
@@ -103,7 +115,7 @@
   *_*_*_CC_FLAGS = -D DISABLE_NEW_DEPRECATED_INTERFACES
   
   # Coreboot-specific build options
-  GCC:*_*_*_CC_FLAGS = -DCOREBOOT_PLATFORM -I$(WORKSPACE)/BloodHorn/coreboot
+  GCC:*_*_*_CC_FLAGS = -DCOREBOOT_PLATFORM -I$(WORKSPACE)/BloodHorn/coreboot -I$(WORKSPACE)/Edk2BHModules
   
   # Debug options
   *_DEBUG_*_CC_FLAGS = -DDEBUG_ENABLE=1
@@ -114,6 +126,9 @@
   
   # Warning flags
   GCC:*_*_*_CC_FLAGS = -Wall -Werror -Wno-array-bounds -Wno-unused-parameter
+  
+  # Set the EDK2 build tools path
+  *_*_*_PATH = $(WORKSPACE)/Edk2BHModules/BaseTools/BinWrappers/WindowsLike
 
 [UserExtensions.TianoCore."ExtraFiles"]
   # Coreboot platform files
