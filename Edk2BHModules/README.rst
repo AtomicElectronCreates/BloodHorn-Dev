@@ -21,7 +21,6 @@ Core Packages
 BloodHorn-Specific Additions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - **CorebootPayloadPkg**: Support for Coreboot integration
-- **Custom Build Tools**: Modified build system for BloodHorn's requirements
 
 Building
 --------
