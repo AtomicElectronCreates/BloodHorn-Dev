@@ -156,12 +156,22 @@ CPPFLAGS = $(INCLUDE)
 # keep EXTRA_OPTFLAGS last
 BUILD_OPTFLAGS = -O2 $(EXTRA_OPTFLAGS)
 
-ifeq ($(DARWIN),Darwin)
+ifeq (Windows, $(findstring Windows,$(MAKE_HOST)))
+# Use GCC on Windows with compatible flags
+CC = gcc
+CXX = g++
+AR = ar
+LD = gcc
+CFLAGS = -MD -fshort-wchar -fno-strict-aliasing -fwrapv \
+         -fno-delete-null-pointer-checks -Wall \
+         -Wno-deprecated-declarations -Wno-unused-result -nostdlib -g -O2
+CXXFLAGS = -Wno-unused-result -O2
+LDFLAGS =
+else ifeq ($(DARWIN),Darwin)
 # assume clang or clang compatible flags on OS X
 CFLAGS = -MD -fshort-wchar -fno-strict-aliasing -Wall -Werror \
 -Wno-deprecated-declarations -Wno-self-assign -Wno-unused-result -nostdlib -g
-else
-ifneq ($(CLANG),)
+else ifneq ($(CLANG),)
 CFLAGS = -MD -fshort-wchar -fno-strict-aliasing -fwrapv \
 -fno-delete-null-pointer-checks -Wall -Werror \
 -Wno-deprecated-declarations -Wno-self-assign \
@@ -171,7 +181,6 @@ CFLAGS = -MD -fshort-wchar -fno-strict-aliasing -fwrapv \
 -fno-delete-null-pointer-checks -Wall -Werror \
 -Wno-deprecated-declarations -Wno-stringop-truncation -Wno-restrict \
 -Wno-unused-result -nostdlib -g
-endif
 endif
 ifneq ($(CLANG),)
 LDFLAGS =

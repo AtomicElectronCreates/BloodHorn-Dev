@@ -137,17 +137,32 @@ class ThreadControl(object):
 
 def Run():
     curdir = os.path.abspath(os.curdir)
-    if len(args.subdirs) == 1:
+    existing_dirs = []
+    
+    # Filter out non-existent directories
+    for dir in args.subdirs:
+        full_path = os.path.join(curdir, dir)
+        if os.path.exists(full_path):
+            existing_dirs.append(dir)
+        else:
+            print(f"Skipping non-existent directory: {dir}")
+    
+    if not existing_dirs:
+        print("No valid directories to process.")
+        return
+        
+    if len(existing_dirs) == 1:
         args.jobs = 1
+        
     if args.jobs == 1:
         try:
-            for dir in args.subdirs:
+            for dir in existing_dirs:
                 RunCommand(os.path.join(curdir, dir), "nmake", args.target, stdout=sys.stdout, stderr=subprocess.STDOUT)
         except RuntimeError:
             exit(1)
     else:
         controller = ThreadControl(args.jobs)
-        for dir in args.subdirs:
+        for dir in existing_dirs:
             controller.addTask(RunCommand, os.path.join(curdir, dir), "nmake", args.target)
         controller.startSchedule()
         controller.waitComplete()
