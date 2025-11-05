@@ -1,12 +1,12 @@
 # BloodHorn
 
 <p align="center">
-  <img src="Z.png" alt="BloodHorn Logo" width="500"/>
+  <img src="./Z.png" alt="BloodHorn Logo" width="500"/>
   <br>
   <em>Fast, secure, and reliable system bootstrapping</em>
 </p>
 
-![Code Quality](./quality_badge.svg)
+![Code Quality](quality_badge.svg)
 
 ## About BloodHorn
 
@@ -41,20 +41,26 @@ Note: The BloodHorn team is not responsible for any hardware damage or data loss
 ## Project History
 
 ### Origins (2016)
-The BloodHorn project originated from an open-source bootloader prototype discovered in 2016. The initial codebase was developed by an anonymous contributor and shared on a technical forum in 4chan. The current maintainer recognized its potential and began maintaining and expanding the project.
+The BloodHorn project began as an ambitious bootloader prototype in 2016. The initial version, though basic, demonstrated the core concepts that would evolve into the modern BloodHorn bootloader.
+
+![First BloodHorn Screenshot (2016)](./2016screenshot.png)
+*The original BloodHorn interface from 2016, showing the first successful boot sequence*
 
 ### Development Timeline
-- **2016-2018**: Core functionality refinement and initial testing
-- **2019-2021**: Major architectural improvements and feature additions
-- **2022-2023**: Codebase modernization and security enhancements
-- **2024-Present**: Active maintenance and community development
+- **2016**: Initial prototype developed by an anonymous contributor
+- **2017**: Core architecture established with basic boot functionality
+- **2018-2019**: Major refactoring and feature additions
+- **2020-2021**: Security enhancements and performance optimizations
+- **2022-2023**: Multi-architecture support and advanced features
+- **2024-Present**: Active maintenance and community contributions
 
 ### Project Philosophy
-BloodHorn is developed with a focus on:
-- Technical excellence
-- Minimal resource usage
-- Clean, maintainable code
-- Practical functionality over marketing
+BloodHorn is built with a focus on:
+- **Reliability**: Rock-solid performance in all conditions
+- **Efficiency**: Minimal resource usage, maximum speed
+- **Security**: Built-in protections against common threats
+- **Extensibility**: Modular design for future expansion
+- **Community**: Open development with active contributor support
 
 ## Support Me
 
