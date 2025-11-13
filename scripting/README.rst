@@ -9,25 +9,40 @@ through custom scripts. It includes a basic lexer, parser, and API bindings.
 Components
 ----------
 
-Script Core (script.c/h)
-~~~~~~~~~~~~~~~~~~~~~~~
+Scripting Module
+================
+This module provides Lua scripting support for the BloodHorn Bootloader.
+
+Core Components
+---------------
+
+lua.c/h
+~~~~~~~
+- Lua virtual machine integration
+- Core Lua API bindings
 - Script execution context
-- Runtime environment
-- Error handling
 - Memory management
 
-Lexer (script_lexer.c/h)
-~~~~~~~~~~~~~~~~~~~~~~~
-- Tokenization
-- Syntax highlighting
-- Source file reading
-- Error reporting
+Script API (script_api.c/h)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- BloodHorn-specific Lua API bindings
+- System functions exposure
+- Bootloader integration points
+- Security sandboxing
 
-Parser (script_parser.c/h)
-~~~~~~~~~~~~~~~~~~~~~~~~~
-- Abstract syntax tree generation
-- Syntax validation
-- Expression parsing
+Script Environment (script_env.c/h)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Runtime environment management
+- Script isolation
+- Global state management
+- Error handling
+
+Script Loader (script_loader.c/h)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Script discovery and loading
+- Dependency resolution
+- Script lifecycle management
+- Resource cleanup
 - Control flow analysis
 
 API Bindings (script_api.c/h)
