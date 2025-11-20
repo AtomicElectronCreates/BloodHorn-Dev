@@ -1,10 +1,9 @@
-# .woodpecker.yml
 steps:
 
   build_i386:
-    image: archlinux:latest
+    image: i386/alpine:latest
     commands:
-      - pacman -Sy --noconfirm gcc make nasm
+      - apk add build-base make bash
       - |
         echo "=== Building for i386 ==="
         set +e
@@ -14,9 +13,9 @@ steps:
         exit 0
 
   build_x86_64:
-    image: archlinux:latest
+    image: alpine:latest
     commands:
-      - pacman -Sy --noconfirm gcc make nasm
+      - apk add build-base make bash nasm
       - |
         echo "=== Building for x86_64 ==="
         set +e
@@ -26,7 +25,7 @@ steps:
         exit 0
 
   build_arm32:
-    image: multiarch/alpine:armhf-latest
+    image: arm32v7/alpine:latest
     commands:
       - apk add build-base make bash
       - |
@@ -38,7 +37,7 @@ steps:
         exit 0
 
   build_aarch64:
-    image: multiarch/alpine:aarch64-latest
+    image: arm64v8/alpine:latest
     commands:
       - apk add build-base make bash
       - |
@@ -50,7 +49,7 @@ steps:
         exit 0
 
   build_riscv64:
-    image: debian:stable
+    image: riscv64/debian:latest
     commands:
       - apt update && apt install -y build-essential make gcc-riscv64-linux-gnu
       - |
