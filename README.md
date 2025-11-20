@@ -7,7 +7,8 @@
 </p>
 
 ![Code Quality](quality_badge.svg)
-
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Platform](https://img.shields.io/badge/platform-x86__64%20%7C%20ARM64%20%7C%20RISC--V%20%7C%20LoongArch-blue)](https://codeberg.org/PacHashs/BloodHorn)[![Build Status](https://ci.codeberg.org/api/badges/PacHashs/BloodHorn/status.svg)](https://ci.codeberg.org/PacHashs/BloodHorn)
 ## About BloodHorn
 
 BloodHorn is a modern, high-performance bootloader built on the EDK2 framework with Coreboot integration. Designed for speed, security, and reliability, it provides a robust foundation for system initialization across multiple architectures.
@@ -62,16 +63,60 @@ BloodHorn is built with a focus on:
 - **Extensibility**: Modular design for future expansion
 - **Community**: Open development with active contributor support
 
+## CI/CD Pipeline
+
+BloodHorn uses Woodpecker CI for continuous integration and deployment. The pipeline ensures code quality, build verification, and automated testing across multiple platforms.
+
+### Pipeline Overview
+
+- **Build Pipeline**: Compiles the codebase for all supported architectures
+- **Test Pipeline**: Runs unit and integration tests
+- **Release Pipeline**: Handles versioned releases and deployment
+
+### Pipeline Status
+
+[![Build Status](https://ci.codeberg.org/api/badges/PacHashs/BloodHorn/status.svg)](https://ci.codeberg.org/PacHashs/BloodHorn)
+
+### Pipeline Configuration
+
+The pipeline is configured using `.woodpecker.yml` in the root directory. Key features include:
+
+- **Matrix Builds**: Parallel builds for multiple architectures (x86_64, ARM64, RISC-V, LoongArch)
+- **Caching**: Optimized build times with dependency caching
+- **Artifacts**: Build artifacts are stored and available for download
+- **Security Scans**: Automated security scanning of dependencies and code
+- **Code Quality**: Static analysis and code style checks
+
+### Local Development
+
+To run the pipeline locally:
+
+```bash
+# Install Woodpecker CLI
+curl -sL https://woodpecker.ci.org/install.sh | sh
+
+# Run the pipeline locally
+woodpecker exec
+```
+
+### Pipeline Steps
+
+1. **Setup**: Install dependencies and set up the build environment
+2. **Build**: Compile the code for all target platforms
+3. **Test**: Run automated tests
+4. **Package**: Create distributable packages
+5. **Deploy**: Deploy to staging or production (on release)
+
+### Monitoring
+
+Pipeline status and logs are available at [ci.codeberg.org/PacHashs/BloodHorn](https://ci.codeberg.org/PacHashs/BloodHorn)
+
 ## Support Me
 
 If you like this project and want to support me, you can donate through [Liberapay](https://liberapay.com/Listedroot/donate).
 
-[![Build Status](https://ci.codeberg.org/api/badges/PacHashs/BloodHorn/status.svg)](https://ci.codeberg.org/PacHashs/BloodHorn)
-
 [![Donate using Liberapay](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/Listedroot/donate)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Platform](https://img.shields.io/badge/platform-x86__64%20%7C%20ARM64%20%7C%20RISC--V%20%7C%20LoongArch-blue)](https://codeberg.org/PacHashs/BloodHorn)
 
 ## Getting Started
 
