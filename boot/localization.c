@@ -128,6 +128,10 @@ void SetLanguage(const char* lang_code) {
     }
 }
 
+const char* GetCurrentLanguage(void) {
+    return current_lang;
+}
+
 const wchar_t* GetLocalizedString(const char* key) {
     // First look in loaded locale table
     if (g_loc && key) {

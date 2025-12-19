@@ -171,7 +171,13 @@ ShowBootMenu() {
     EFI_INPUT_KEY Key;
     struct MouseState mouse = {0};
     // LoadThemeAndLanguageFromConfig(); // removed, now in main.c
-    LoadLocalizationFile("en"); // TODO: use selected lang
+    // Load localization based on configured language
+    const char* selected_lang = GetCurrentLanguage();
+    if (selected_lang && selected_lang[0]) {
+        LoadLocalizationFile(selected_lang);
+    } else {
+        LoadLocalizationFile("en"); // Fallback to English
+    }
     AssignHotkeys();
     Status = InitializeGraphics();
     if (EFI_ERROR(Status)) {

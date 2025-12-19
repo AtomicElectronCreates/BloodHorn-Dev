@@ -9,5 +9,6 @@
 
 const wchar_t* GetLocalizedString(const char* key);
 void SetLanguage(const char* lang_code);
+const char* GetCurrentLanguage(void);
 
-#endif // BLOODHORN_LOCALIZATION_H 
+#endif // BLOODHORN_LOCALIZATION_H

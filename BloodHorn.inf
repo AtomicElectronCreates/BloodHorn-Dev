@@ -10,6 +10,19 @@
 
 [Sources]
   main.c
+  boot/font.c
+  boot/localization.c
+  # FreeType sources for TTF support
+  boot/freetype/src/base/ftbase.c
+  boot/freetype/src/base/ftbbox.c
+  boot/freetype/src/base/ftbitmap.c
+  boot/freetype/src/base/ftglyph.c
+  boot/freetype/src/base/ftinit.c
+  boot/freetype/src/base/ftsystem.c
+  boot/freetype/src/truetype/truetype.c
+  boot/freetype/src/sfnt/sfnt.c
+  boot/freetype/src/psaux/psaux.c
+  boot/freetype/src/psnames/psnames.c
   net/arp.c
   net/dhcp.c
   net/net_utils.c
@@ -133,11 +146,11 @@
   UefiHiiLib
 
 [BuildOptions]
-  MSFT:*_*_*_CC_FLAGS = /D UNICODE
-  GCC:*_*_*_CC_FLAGS = -DUNICODE -std=c++17
-  XCODE:*_*_*_CC_FLAGS = -DUNICODE -std=c++17
-  INTEL:*_*_*_CC_FLAGS = /D UNICODE /Qstd=c++17
-  RVCT:*_*_*_CC_FLAGS = -DUNICODE --cpp11
+  MSFT:*_*_*_CC_FLAGS = /D UNICODE /I"$(WORKSPACE)/BloodHorn/boot/freetype/include" /D FT2_BUILD_LIBRARY /D FT_CONFIG_OPTION_SYSTEM_ZLIB=0 /D FT_CONFIG_OPTION_USE_ZLIB=0 /D FT_CONFIG_OPTION_USE_BZIP2=0 /D FT_CONFIG_OPTION_USE_PNG=0 /D FT_CONFIG_OPTION_USE_HARFBUZZER=0 /D FT_CONFIG_OPTION_MAC_FONTS=0 /D FT_CONFIG_OPTION_OLD_MAC_FONTS=0
+  GCC:*_*_*_CC_FLAGS = -DUNICODE -std=c++17 -I$(WORKSPACE)/BloodHorn/boot/freetype/include -DFT2_BUILD_LIBRARY -DFT_CONFIG_OPTION_SYSTEM_ZLIB=0 -DFT_CONFIG_OPTION_USE_ZLIB=0 -DFT_CONFIG_OPTION_USE_BZIP2=0 -DFT_CONFIG_OPTION_USE_PNG=0 -DFT_CONFIG_OPTION_USE_HARFBUZZER=0 -DFT_CONFIG_OPTION_MAC_FONTS=0 -DFT_CONFIG_OPTION_OLD_MAC_FONTS=0
+  XCODE:*_*_*_CC_FLAGS = -DUNICODE -std=c++17 -I"$(WORKSPACE)/BloodHorn/boot/freetype/include" /D FT2_BUILD_LIBRARY /D FT_CONFIG_OPTION_SYSTEM_ZLIB=0 /D FT_CONFIG_OPTION_USE_ZLIB=0 /D FT_CONFIG_OPTION_USE_BZIP2=0 /D FT_CONFIG_OPTION_USE_PNG=0 /D FT_CONFIG_OPTION_USE_HARFBUZZER=0 /D FT_CONFIG_OPTION_MAC_FONTS=0 /D FT_CONFIG_OPTION_OLD_MAC_FONTS=0
+  INTEL:*_*_*_CC_FLAGS = /D UNICODE /Qstd=c++17 /I"$(WORKSPACE)/BloodHorn/boot/freetype/include" /D FT2_BUILD_LIBRARY /D FT_CONFIG_OPTION_SYSTEM_ZLIB=0 /D FT_CONFIG_OPTION_USE_ZLIB=0 /D FT_CONFIG_OPTION_USE_BZIP2=0 /D FT_CONFIG_OPTION_USE_PNG=0 /D FT_CONFIG_OPTION_USE_HARFBUZZER=0 /D FT_CONFIG_OPTION_MAC_FONTS=0 /D FT_CONFIG_OPTION_OLD_MAC_FONTS=0
+  RVCT:*_*_*_CC_FLAGS = -DUNICODE --cpp11 -I"$(WORKSPACE)/BloodHorn/boot/freetype/include" /D FT2_BUILD_LIBRARY /D FT_CONFIG_OPTION_SYSTEM_ZLIB=0 /D FT_CONFIG_OPTION_USE_ZLIB=0 /D FT_CONFIG_OPTION_USE_BZIP2=0 /D FT_CONFIG_OPTION_USE_PNG=0 /D FT_CONFIG_OPTION_USE_HARFBUZZER=0 /D FT_CONFIG_OPTION_MAC_FONTS=0 /D FT_CONFIG_OPTION_OLD_MAC_FONTS=0
 
 [BuildOptions.common.EDKII.UEFI_APPLICATION]
   *_*_*_CC_FLAGS = -D DISABLE_NEW_DEPRECATED_INTERFACES

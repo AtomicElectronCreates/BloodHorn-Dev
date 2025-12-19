@@ -21,6 +21,19 @@ We run CI builds and tests on the public pipeline. See `.woodpecker.yml` for det
 ## Support
 If you find BloodHorn useful, see `CONTRIBUTING.md` or support via the project's sponsorship links.
 
+## Dependencies
+
+BloodHorn uses the following external dependencies as Git submodules:
+
+- **FreeType** (`boot/freetype`): Font rendering library for TTF/OTF support
+  - Repository: https://gitlab.freedesktop.org/freetype/freetype.git
+  - Automatically initialized with `git submodule update --init`
+
+- **Edk2BH** (`Edk2BH`): Modified EDK2 firmware framework
+  - Repository: https://codeberg.org/BloodyHell-Industries-INC/Edk2BH.git
+  - Custom EDK2 modifications for BloodHorn bootloader
+  - Automatically initialized with `git submodule update --init`
+
 ## Build and installation (from source)
 
 Note: This repository does not include prebuilt binaries. Build from source; see `INSTALL.md` for comprehensive, platform-specific instructions.
@@ -43,6 +56,9 @@ export PACKAGES_PATH=$(pwd):$(pwd)/..
 
 # Prepare and build BloodHorn (from edk2 root)
 cp -r ../BloodHorn .
+cd BloodHorn
+git submodule update --init  # Initialize FreeType dependency
+cd ..
 build -a X64 -p BloodHorn.dsc -b RELEASE -t GCC5
 ```
 

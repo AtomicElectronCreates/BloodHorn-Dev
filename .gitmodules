@@ -1,0 +1,6 @@
+[submodule "boot/freetype"]
+	path = boot/freetype
+	url = https://gitlab.freedesktop.org/freetype/freetype.git
+[submodule "Edk2BH"]
+	path = Edk2BH
+	url = https://codeberg.org/BloodyHell-Industries-INC/Edk2BH.git
