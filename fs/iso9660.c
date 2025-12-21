@@ -1,3 +1,10 @@
+/*
+ * iso9660.c
+ *
+ * This file is part of BloodHorn and is licensed under the BSD License.
+ * See the root of the repository for license details.
+ */
+
 #include "iso9660.h"
 #include "compat.h"
 #include "mm.h"

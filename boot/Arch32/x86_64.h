@@ -1,9 +1,10 @@
 /*
- * BloodHorn Bootloader
+ * x86_64.h
  *
- * This file is part of BloodHorn and is licensed under the MIT License.
+ * This file is part of BloodHorn and is licensed under the BSD License.
  * See the root of the repository for license details.
  */
+
 #ifndef BLOODHORN_X86_64_H
 #define BLOODHORN_X86_64_H
 #include <stdint.h>

@@ -1,7 +1,9 @@
-import os
-import re
+# BloodHornQL.py
+#
+# This file is part of BloodHorn and is licensed under the BSD License.
+# See the root of the repository for license details.
+#
 
-# Adjusted weights to favor bootloader-specific metrics
 EDK2_WEIGHTS = {
     "sec_pei_dxe": 25,    # EDK2 phases are crucial
     "comments": 15,       # Documentation is rare in bootloaders

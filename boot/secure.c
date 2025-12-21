@@ -1,9 +1,10 @@
 /*
- * BloodHorn Bootloader
+ * secure.c
  *
- * This file is part of BloodHorn and is licensed under the MIT License.
+ * This file is part of BloodHorn and is licensed under the BSD License.
  * See the root of the repository for license details.
  */
+
 #include <Uefi.h>
 #include "compat.h"
 #include <Library/UefiLib.h>

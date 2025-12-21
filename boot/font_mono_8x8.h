@@ -1,3 +1,10 @@
+/*
+ * font_mono_8x8.h
+ *
+ * This file is part of BloodHorn and is licensed under the BSD License.
+ * See the root of the repository for license details.
+ */
+
 // Complete 8x8 bitmap font data for ASCII 32-126
 static const uint8_t complete_mono_font_8x8[] = {
     // Space (32)

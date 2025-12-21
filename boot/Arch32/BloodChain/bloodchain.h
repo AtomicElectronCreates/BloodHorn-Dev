@@ -1,63 +1,10 @@
-#ifndef BLOODCHAIN_H
-#define BLOODCHAIN_H
-
-#include <stdint.h>
-
-// BloodChain Boot Protocol (BCBP) Specification
-// Version: 1.0
-// Magic: 0x424C4348 ("BLCH" in ASCII)
-
-// Module Types
-#define BCBP_MODTYPE_KERNEL     0x01  // OS Kernel
-#define BCBP_MODTYPE_INITRD     0x02  // Initial RAM disk
-#define BCBP_MODTYPE_ACPI       0x03  // ACPI tables
-#define BCBP_MODTYPE_SMBIOS     0x04  // SMBIOS tables
-#define BCBP_MODTYPE_DEVICETREE 0x05  // Device tree blob
-#define BCBP_MODTYPE_EFI        0x06  // EFI runtime services
-#define BCBP_MODTYPE_CONFIG     0x07  // Configuration file
-#define BCBP_MODTYPE_DRIVER     0x08  // Hardware driver
-
-// Boot Information Structure
-struct bcbp_header {
-    uint32_t magic;          // 0x424C4348 ("BLCH")
-    uint32_t version;        // Protocol version (1.0 = 0x00010000)
-    uint64_t entry_point;    // 64-bit entry point address
-    uint64_t flags;          // Boot flags
-    uint64_t boot_device;    // Boot device identifier
-    uint64_t acpi_rsdp;      // ACPI RSDP address (0 if not available)
-    uint64_t smbios;         // SMBIOS entry point (0 if not available)
-    uint64_t framebuffer;    // Framebuffer information (0 if not available)
-    uint64_t module_count;   // Number of loaded modules
-    uint64_t modules;        // Pointer to module list
-    uint8_t secure_boot;     // Secure boot status (0=disabled, 1=enabled)
-    uint8_t tpm_available;   // TPM available (0=no, 1=yes)
-    uint8_t uefi_64bit;      // 64-bit UEFI (0=no, 1=yes)
-    uint8_t reserved[5];     // Reserved for future use
-    uint8_t signature[64];   // Cryptographic signature (optional)
-} __attribute__((packed));
-
-// Module Information Structure
-struct bcbp_module {
-    uint64_t start;          // Module start address
-    uint64_t size;           // Module size in bytes
-    uint64_t cmdline;        // Command line string (0 if none)
-    uint64_t name;           // Module name string
-    uint8_t type;            // Module type (see BCBP_MODTYPE_*)
-    uint8_t reserved[7];     // Reserved for future use
-} __attribute__((packed));
-
-// Bootloader Interface (for bootloader implementation)
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/**
- * Initialize the BCBP header structure
- * 
- * @param hdr          Pointer to the header structure to initialize
- * @param entry_point  Kernel entry point address
- * @param boot_device  Boot device identifier
+/*
+ * bloodchain.h
+ *
+ * This file is part of BloodHorn and is licensed under the BSD License.
+ * See the root of the repository for license details.
  */
+
 void bcbp_init(struct bcbp_header *hdr, uint64_t entry_point, uint64_t boot_device);
 
 /**

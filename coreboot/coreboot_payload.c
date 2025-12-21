@@ -1,8 +1,8 @@
-/**
- * Coreboot Payload Interface for BloodHorn Bootloader
+/*
+ * coreboot_payload.c
  *
- * This module implements the Coreboot payload interface, allowing
- * BloodHorn to be loaded and executed as a Coreboot payload.
+ * This file is part of BloodHorn and is licensed under the BSD License.
+ * See the root of the repository for license details.
  */
 
 #include <Uefi.h>

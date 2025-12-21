@@ -1,3 +1,10 @@
+/*
+ * fs_mount.c
+ *
+ * This file is part of BloodHorn and is licensed under the BSD License.
+ * See the root of the repository for license details.
+ */
+
 #include "fs_mount.h"
 #include "compat.h"
 #include "fat32.h"

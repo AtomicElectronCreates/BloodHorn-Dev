@@ -1,6 +1,10 @@
 /*
- * BloodHorn Bootloader - TPM 2.0 Implementation
+ * tpm2.c
+ *
+ * This file is part of BloodHorn and is licensed under the BSD License.
+ * See the root of the repository for license details.
  */
+
 #include "tpm2.h"
 #include "crypto.h"
 #include "compat.h"

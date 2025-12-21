@@ -1,18 +1,10 @@
-#include <Uefi.h>
-#include "compat.h"
-#include <Library/UefiLib.h>
-#include <Library/UefiBootServicesTableLib.h>
-#include <Protocol/GraphicsOutput.h>
+/*
+ * graphics.c
+ *
+ * This file is part of BloodHorn and is licensed under the BSD License.
+ * See the root of the repository for license details.
+ */
 
-// Global graphics context
-EFI_GRAPHICS_OUTPUT_PROTOCOL *GraphicsOutput = NULL;
-
-/**
-  Initializes the graphics output.
-  
-  @retval EFI_SUCCESS   The graphics output was initialized successfully.
-  @retval Other         An error occurred.
-**/
 EFI_STATUS
 InitializeGraphics() {
     EFI_STATUS Status;

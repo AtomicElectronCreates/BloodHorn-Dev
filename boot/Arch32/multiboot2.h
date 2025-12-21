@@ -1,9 +1,10 @@
 /*
- * BloodHorn Bootloader
+ * multiboot2.h
  *
- * This file is part of BloodHorn and is licensed under the MIT License.
+ * This file is part of BloodHorn and is licensed under the BSD License.
  * See the root of the repository for license details.
  */
+
 #ifndef BLOODHORN_MULTIBOOT2_H
 #define BLOODHORN_MULTIBOOT2_H
 #include <stdint.h>

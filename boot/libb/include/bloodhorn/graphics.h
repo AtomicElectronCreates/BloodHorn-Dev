@@ -1,6 +1,8 @@
-/**
- * @file graphics.h
- * @brief Graphics and display functionality for BloodHorn
+/*
+ * graphics.h
+ *
+ * This file is part of BloodHorn and is licensed under the BSD License.
+ * See the root of the repository for license details.
  */
 
 #ifndef BLOODHORN_GRAPHICS_H

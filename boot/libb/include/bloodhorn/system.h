@@ -1,6 +1,8 @@
-/**
- * @file system.h
- * @brief System interface definitions for BloodHorn
+/*
+ * system.h
+ *
+ * This file is part of BloodHorn and is licensed under the BSD License.
+ * See the root of the repository for license details.
  */
 
 #ifndef BLOODHORN_SYSTEM_H

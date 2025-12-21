@@ -1,8 +1,8 @@
-/**
- * Coreboot Platform Integration Header for BloodHorn Bootloader
+/*
+ * coreboot_platform.h
  *
- * This header defines the interface between BloodHorn bootloader
- * and the Coreboot firmware platform.
+ * This file is part of BloodHorn and is licensed under the BSD License.
+ * See the root of the repository for license details.
  */
 
 #ifndef COREBOOT_PLATFORM_H

@@ -1,3 +1,10 @@
+/*
+ * script_api.c
+ *
+ * This file is part of BloodHorn and is licensed under the BSD License.
+ * See the root of the repository for license details.
+ */
+
 #include "script_api.h"
 #include "compat.h"
 #include "lua.h"

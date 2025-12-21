@@ -1,3 +1,10 @@
+/*
+ * asm.h
+ *
+ * This file is part of BloodHorn and is licensed under the BSD License.
+ * See the root of the repository for license details.
+ */
+
 #ifndef BLOODCHAIN_ASM_H
 #define BLOODCHAIN_ASM_H
 

@@ -1,19 +1,10 @@
-#pragma once
-
-#include <cstdint>
-#include <string>
-#include <vector>
-#include <string_view>
-#include <system_error>
-#include <memory>
-#include <array>
-#include <span>
-
-namespace BloodHorn::Net {
-
-/**
- * @brief Represents an IPv4 address
+/*
+ * network.hpp
+ *
+ * This file is part of BloodHorn and is licensed under the BSD License.
+ * See the root of the repository for license details.
  */
+
 class IPv4Address {
 public:
     constexpr IPv4Address() : octets_{0, 0, 0, 0} {}

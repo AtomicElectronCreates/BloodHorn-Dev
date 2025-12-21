@@ -1,8 +1,8 @@
-/**
- * BloodHorn Coreboot Main Entry Point
- * 
- * This file provides the main entry point and core logic for BloodHorn
- * when running as a Coreboot payload with UEFI compatibility.
+/*
+ * coreboot_main.c
+ *
+ * This file is part of BloodHorn and is licensed under the BSD License.
+ * See the root of the repository for license details.
  */
 
 #include <Library/PrintLib.h>

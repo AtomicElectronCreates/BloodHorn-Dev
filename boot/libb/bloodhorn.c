@@ -1,6 +1,8 @@
-/**
- * @file bloodhorn.c
- * @brief BloodHorn Bootloader Development Library Implementation
+/*
+ * bloodhorn.c
+ *
+ * This file is part of BloodHorn and is licensed under the BSD License.
+ * See the root of the repository for license details.
  */
 
 #include <bloodhorn/bloodhorn.h>

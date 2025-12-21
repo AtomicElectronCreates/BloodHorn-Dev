@@ -1,6 +1,8 @@
-/**
- * @file bootinfo.h
- * @brief Boot information structures for BloodHorn
+/*
+ * bootinfo.h
+ *
+ * This file is part of BloodHorn and is licensed under the BSD License.
+ * See the root of the repository for license details.
  */
 
 #ifndef BLOODHORN_BOOTINFO_H

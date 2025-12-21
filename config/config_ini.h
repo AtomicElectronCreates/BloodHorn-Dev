@@ -1,9 +1,10 @@
-#ifndef BLOODHORN_CONFIG_INI_H
-#define BLOODHORN_CONFIG_INI_H
-
-/**
- * Boot menu entry structure for INI configuration parsing
+/*
+ * config_ini.h
+ *
+ * This file is part of BloodHorn and is licensed under the BSD License.
+ * See the root of the repository for license details.
  */
+
 struct boot_menu_entry {
     char section[128];
     char name[64];

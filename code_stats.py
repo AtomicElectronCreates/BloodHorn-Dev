@@ -1,4 +1,9 @@
-#!/usr/bin/env python3
+# code_stats.py
+#
+# This file is part of BloodHorn and is licensed under the BSD License.
+# See the root of the repository for license details.
+#
+
 """
 Code Statistics Counter
 

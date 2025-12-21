@@ -1,3 +1,10 @@
+/*
+ * config_json.h
+ *
+ * This file is part of BloodHorn and is licensed under the BSD License.
+ * See the root of the repository for license details.
+ */
+
 #ifndef BLOODHORN_CONFIG_JSON_H
 #define BLOODHORN_CONFIG_JSON_H
 struct config_json { char key[32]; char value[128]; };

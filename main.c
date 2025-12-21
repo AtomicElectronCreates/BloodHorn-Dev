@@ -1,9 +1,8 @@
-/**
- * BloodHorn Bootloader Main Entry Point - Coreboot + UEFI Hybrid
+/*
+ * main.c
  *
- * This is the main entry point for BloodHorn bootloader with Coreboot firmware
- * platform integration. It detects Coreboot firmware and uses hybrid initialization
- * where Coreboot handles hardware services and UEFI handles higher-level services.
+ * This file is part of BloodHorn and is licensed under the BSD License.
+ * See the root of the repository for license details.
  */
 
 #include <Uefi.h>

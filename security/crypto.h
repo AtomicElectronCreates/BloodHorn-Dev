@@ -1,3 +1,10 @@
+/*
+ * crypto.h
+ *
+ * This file is part of BloodHorn and is licensed under the BSD License.
+ * See the root of the repository for license details.
+ */
+
 #ifndef BLOODHORN_CRYPTO_H
 #define BLOODHORN_CRYPTO_H
 #include <stdint.h>

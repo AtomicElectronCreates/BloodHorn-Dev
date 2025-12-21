@@ -1,9 +1,10 @@
 /*
- * BloodHorn Bootloader
+ * font.h
  *
- * This file is part of BloodHorn and is licensed under the MIT License.
+ * This file is part of BloodHorn and is licensed under the BSD License.
  * See the root of the repository for license details.
  */
+
 #ifndef BLOODHORN_FONT_H
 #define BLOODHORN_FONT_H
 

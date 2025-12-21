@@ -1,3 +1,10 @@
+/*
+ * shell_fs.c
+ *
+ * This file is part of BloodHorn and is licensed under the BSD License.
+ * See the root of the repository for license details.
+ */
+
 #include "shell_fs.h"
 #include "compat.h"
 #include "../fs/fat32.h"

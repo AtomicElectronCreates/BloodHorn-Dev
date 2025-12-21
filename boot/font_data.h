@@ -1,3 +1,10 @@
+/*
+ * font_data.h
+ *
+ * This file is part of BloodHorn and is licensed under the BSD License.
+ * See the root of the repository for license details.
+ */
+
 // Complete 8x16 bitmap font data for ASCII 32-126
 static const uint8_t complete_font_8x16[] = {
     // Space (32)

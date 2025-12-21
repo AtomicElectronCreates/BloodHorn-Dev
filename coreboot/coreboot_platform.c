@@ -1,23 +1,8 @@
-/**
- * Coreboot Platform Integration for BloodHorn Bootloader
+/*
+ * coreboot_platform.c
  *
- * This module provides Coreboot firmware platform support, replacing
- * UEFI/EDK2 initialization with native Coreboot firmware services.
- *
- * Coreboot handles:
- * - Hardware initialization (CPU, memory, chipset)
- * - Device discovery and basic initialization
- * - Memory management and mapping
- * - ACPI/SMBIOS table generation
- * - Graphics framebuffer initialization
- * - PCI/USB/Storage/Network initialization
- * - TPM and Secure Boot support
- *
- * BloodHorn bootloader focuses on:
- * - Boot protocol support (Linux, Multiboot, etc.)
- * - Filesystem operations for loading kernels
- * - Boot menu and configuration
- * - High-level boot logic
+ * This file is part of BloodHorn and is licensed under the BSD License.
+ * See the root of the repository for license details.
  */
 
 #include <Uefi.h>

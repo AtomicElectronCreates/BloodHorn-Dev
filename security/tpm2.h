@@ -1,9 +1,10 @@
 /*
- * BloodHorn Bootloader - TPM 2.0 Support
+ * tpm2.h
  *
- * This file is part of BloodHorn and is licensed under the MIT License.
+ * This file is part of BloodHorn and is licensed under the BSD License.
  * See the root of the repository for license details.
  */
+
 #ifndef BLOODHORN_TPM2_H
 #define BLOODHORN_TPM2_H
 

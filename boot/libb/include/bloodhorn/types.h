@@ -1,6 +1,8 @@
-/**
- * @file types.h
- * @brief Basic type definitions for BloodHorn
+/*
+ * types.h
+ *
+ * This file is part of BloodHorn and is licensed under the BSD License.
+ * See the root of the repository for license details.
  */
 
 #ifndef BLOODHORN_TYPES_H

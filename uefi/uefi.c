@@ -1,19 +1,10 @@
-#include <Uefi.h>
-#include "compat.h"
-#include <Library/UefiLib.h>
-#include <Library/UefiBootServicesTableLib.h>
-#include <Library/MemoryAllocationLib.h>
-#include <Protocol/SimpleFileSystem.h>
-#include <Protocol/DevicePath.h>
+/*
+ * uefi.c
+ *
+ * This file is part of BloodHorn and is licensed under the BSD License.
+ * See the root of the repository for license details.
+ */
 
-/**
-  Locates the root directory of the boot device.
-  
-  @param[out] RootFs    Pointer to the root file system interface.
-  
-  @retval EFI_SUCCESS   The root directory was found successfully.
-  @retval Other         An error occurred.
-**/
 EFI_STATUS
 GetRootFileSystem(
     OUT EFI_FILE_PROTOCOL **RootFs

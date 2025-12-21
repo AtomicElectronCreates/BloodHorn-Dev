@@ -1,3 +1,10 @@
+/*
+ * uefi_network.cpp
+ *
+ * This file is part of BloodHorn and is licensed under the BSD License.
+ * See the root of the repository for license details.
+ */
+
 #include "network.hpp"
 #include "../boot/libb/include/bloodhorn/uefi.h"
 #include <efilib.h>

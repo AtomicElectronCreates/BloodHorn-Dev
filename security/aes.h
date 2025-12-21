@@ -1,3 +1,10 @@
+/*
+ * aes.h
+ *
+ * This file is part of BloodHorn and is licensed under the BSD License.
+ * See the root of the repository for license details.
+ */
+
 #ifndef BLOODHORN_AES_H
 #define BLOODHORN_AES_H
 #include <stdint.h>

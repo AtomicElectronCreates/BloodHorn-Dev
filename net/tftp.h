@@ -1,3 +1,10 @@
+/*
+ * tftp.h
+ *
+ * This file is part of BloodHorn and is licensed under the BSD License.
+ * See the root of the repository for license details.
+ */
+
 #ifndef BLOODHORN_TFTP_H
 #define BLOODHORN_TFTP_H
 #include <stdint.h>
