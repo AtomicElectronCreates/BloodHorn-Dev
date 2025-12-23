@@ -7,3 +7,6 @@
 [submodule "cc-runtime"]
 	path = cc-runtime
 	url = https://codeberg.org/OSDev/cc-runtime.git
+[submodule "cLib"]
+	path = cLib
+	url = https://github.com/BloodyHell-Industries-INC/cLib.git
