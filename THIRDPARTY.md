@@ -23,7 +23,7 @@ This file acknowledges the third-party software, frameworks, and libraries used 
 
 **Author**: AtomicElectron
 **License**: Public Domain
-**Repository**: https://github.com/BloodyHell-Industries-INC/cLib
+**Repository**: https://codeberg/BloodyHell-Industries-INC/cLib
 
 **Usage in BloodHorn**:
 - Complete C standard library implementation
