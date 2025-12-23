@@ -9,4 +9,4 @@
 	url = https://codeberg.org/OSDev/cc-runtime.git
 [submodule "cLib"]
 	path = cLib
-	url = https://github.com/BloodyHell-Industries-INC/cLib.git
+	url = https://codeberg.org/BloodyHell-Industries-INC/cLib.git
