@@ -39,9 +39,9 @@ This file acknowledges the third-party software, frameworks, and libraries used 
 
 **Description**: Compiler runtime compatibility library providing essential runtime functions and compiler-specific implementations for cross-platform compatibility.
 
-**Author**: BloodyHell Industries
-**License**: BSD-2-Clause-Patent
-**Repository**: https://github.com/BloodyHell-Industries-INC/cc-runtime
+**Author**: Mintsuki
+**License**: Apache
+**Repository**: https://codebegr.org/OSDev/cc-runtime
 
 **Usage in BloodHorn**:
 - Compiler compatibility layer
