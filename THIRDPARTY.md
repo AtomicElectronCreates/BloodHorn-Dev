@@ -41,7 +41,7 @@ This file acknowledges the third-party software, frameworks, and libraries used 
 
 **Author**: Mintsuki
 **License**: Apache
-**Repository**: https://codebegr.org/OSDev/cc-runtime
+**Repository**: https://codeberg.org/OSDev/cc-runtime
 
 **Usage in BloodHorn**:
 - Compiler compatibility layer
