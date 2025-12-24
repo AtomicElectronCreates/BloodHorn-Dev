@@ -83,7 +83,7 @@ sudo umount /mnt/efi
 For Windows installation, USB image creation, PXE/HTTP boot, and detailed build options, see `INSTALL.md`.
 
 ## Layout
-Top-level folders include `coreboot/`, `uefi/`, `security/`, `fs/`, `net/`, and `plugins/`.
+Top-level folders include `coreboot/`, `uefi/`, `security/`, `fs/`, and `net/`.
 
 ## Features
 

@@ -32,7 +32,6 @@ After building BloodHorn (see INSTALL.md for build instructions), you can use th
 
 ### 4. Advanced Usage
 - Use the recovery shell for troubleshooting.
-- Use Lua scripting and plugins for advanced boot logic.
 - Chainload other bootloaders or operating systems.
 - Boot over network (PXE/HTTP).
 
@@ -93,7 +92,6 @@ This guide explains how to use BloodHorn bootloader with different operating sys
 5. [Custom Kernels](#custom-kernels)
 6. [Network Boot](#network-boot)
 7. [Configuration Files](#configuration-files)
-8. [Scripting](#scripting)
 9. [Recovery Mode](#recovery-mode)
 
 ## BloodChain Boot Protocol
@@ -580,9 +578,7 @@ kernel=/boot/custom-kernel.bin
 }
 ```
 
-## Scripting
 
-### Lua Scripts
 
 ```lua
 -- /boot/bloodhorn.lua

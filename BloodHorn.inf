@@ -48,11 +48,8 @@
   fs/ext2.c
   security/crypto.c
   security/tpm2.c
-  scripting/lua.c
   recovery/shell.c
   recovery/shell_cmds.c
-  plugins/plugin.c
-  plugins/plugin_loader.c
   config/config_ini.c
   config/config_json.c
   config/config_env.c
