@@ -495,7 +495,15 @@ UefiMain (
         return Status;
     }
 
-    // Initialize BloodHorn library with UEFI system table integration
+    // Initialize BloodHorn library with UEFI system table integration.
+    // Memory-map access goes through a Rust-based shim to avoid unsafe
+    // casting between incompatible function pointer types.
+    extern bh_status_t bhshim_get_memory_map(
+        bh_memory_descriptor_t **Map,
+        bh_size_t *MapSize,
+        bh_size_t *DescriptorSize
+    );
+
     bh_system_table_t bloodhorn_system_table = {
         // Memory management (use UEFI services)
         .alloc = (void* (*)(bh_size_t))AllocatePool,
@@ -506,8 +514,8 @@ UefiMain (
         .puts = bh_uefi_puts,
         .printf = (void (*)(const char*, ...))Print,
 
-        // Memory map (use UEFI memory services or Coreboot if available)
-        .get_memory_map = (bh_status_t (*)(bh_memory_map_t*))gBS->GetMemoryMap,
+        // Memory map: use Rust-backed shim wrapper via C glue
+        .get_memory_map = bhshim_get_memory_map,
 
         // Graphics (use UEFI Graphics Output Protocol or Coreboot framebuffer)
         .get_graphics_info = NULL, // Graphics are handled outside libb

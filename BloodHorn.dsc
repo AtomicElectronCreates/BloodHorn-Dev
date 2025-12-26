@@ -64,6 +64,8 @@
 [Components]
   # Main Application
   BloodHorn/BloodHorn.inf
+  # Rust bhshim bootstrap (host-side tool to build Rust static libs)
+  BloodHorn/rust/bhshim_bootstrap.inf
   
   # Coreboot Support
   BloodHorn/Coreboot/Library/CorebootLib/CorebootLib.inf
@@ -126,6 +128,10 @@
   
   # Warning flags
   GCC:*_*_*_CC_FLAGS = -Wall -Werror -Wno-array-bounds -Wno-unused-parameter
+
+  # Link against Rust bhshim static library for all architectures.
+  # Expect pre-built libbhshim.a to be copied under rust/bhshim/target/lib/<TOOLCHAIN_ARCH>/.
+  GCC:*_*_*_DLINK_FLAGS = -L$(WORKSPACE)/BloodHorn/rust/bhshim/target/lib -lbhshim
   
   # Set the EDK2 build tools path
   *_*_*_PATH = $(WORKSPACE)/Edk2BHModules/BaseTools/BinWrappers/WindowsLike

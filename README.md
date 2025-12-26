@@ -84,6 +84,9 @@ For Windows installation, USB image creation, PXE/HTTP boot, and detailed build 
 
 ## Layout
 Top-level folders include `coreboot/`, `uefi/`, `security/`, `fs/`, and `net/`.
+The `rust/` folder contains internal Rust `no_std` crates used for specific
+helper tasks (for example, a safe UEFI memory-map shim). See
+`docs/Rust-Integration.md` for details.
 
 ## Features
 

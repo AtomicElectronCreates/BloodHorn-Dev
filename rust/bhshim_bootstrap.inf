@@ -1,0 +1,18 @@
+[Defines]
+  INF_VERSION            = 0x00010005
+  BASE_NAME              = BhshimBootstrap
+  FILE_GUID              = 12345678-0000-0000-0000-BHSHIMBOOT0001
+  MODULE_TYPE            = HOST_APPLICATION
+  VERSION_STRING         = 0.1
+
+[Sources]
+  rust/bhshim_bootstrap.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  BaseLib
+
+[BuildOptions]
+  GCC:*_*_*_CC_FLAGS = -std=c11

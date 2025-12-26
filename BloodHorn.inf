@@ -10,6 +10,7 @@
 
 [Sources]
   main.c
+  rust/bhshim_glue.c
   boot/font.c
   boot/localization.c
   # FreeType sources for TTF support

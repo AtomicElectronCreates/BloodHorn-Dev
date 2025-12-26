@@ -1,0 +1,16 @@
+[package]
+name = "bhnet"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "bhnet"
+crate-type = ["staticlib"]
+
+[dependencies]
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
