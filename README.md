@@ -14,6 +14,14 @@
 
 ---
 
+## Project Status: Discontinued
+
+> **Notice**: BloodHorn is now discontinued because the main maintainer has stepped off active development. <img src="./winerr.png" alt="winerr" width="16"/>
+>
+> Thank you to everyone who tested, audited, reported bugs, and believed/or will belive in this project. BloodHorn was built to push firmware security forward, and this community knowledge made that possible. The code stays here as a record of that work. <img src="./winerr.png" alt="winerr" width="16"/>
+
+---
+
 ### Where things stand
 
 - **Release train**: v7.80.0 is our current line. It’s good enough for hostile deployments, but still sees active churn. Expect sharp edges.

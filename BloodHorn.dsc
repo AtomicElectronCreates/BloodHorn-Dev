@@ -9,7 +9,7 @@
 
 [Defines]
   PLATFORM_NAME                  = BloodHorn
-  PLATFORM_GUID                  = BLOODHORN-500-BEEF-DEAD-BLOODBLO0001
+  PLATFORM_GUID                  = 6f4f3e3a-1c4c-4b7d-9a5e-9b3a5c4d1001
   PLATFORM_VERSION                = 1.0
   DSC_SPECIFICATION              = 0x00010005
   OUTPUT_DIRECTORY               = Build/BloodHorn

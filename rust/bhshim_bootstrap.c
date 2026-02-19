@@ -1,8 +1,8 @@
 /*
  * bhshim_bootstrap.c
  *
- * Host-side bootstrapper built by EDK2 that is responsible for building the
- * Rust bhshim static library for all BloodHorn-supported architectures.
+ * Host-side bootstrapper built by EDK2 that is responsible for building
+ * Rust crates for BloodHorn-supported architectures.
  *
  * This is not part of the firmware image; it is intended to be run on the
  * build host prior to linking BloodHorn.
@@ -19,48 +19,64 @@ static int run(const char *cmd) {
     return rc;
 }
 
-int main(void) {
-    int rc = 0;
+static int build_one(const char *cargo, const char *target, const char *manifest_path) {
+    char cmd[512];
+    int len = snprintf(
+        cmd,
+        sizeof(cmd),
+        "%s build -q --release --target %s --manifest-path %s",
+        cargo,
+        target,
+        manifest_path
+    );
 
-    /* Build all Rust crates used by BloodHorn for all supported architectures. */
-
-    /* x86_64 */
-    rc |= run("cargo build -q --release --target x86_64-unknown-none --manifest-path rust/bhshim/Cargo.toml");
-    rc |= run("cargo build -q --release --target x86_64-unknown-none --manifest-path rust/bhcore/Cargo.toml");
-    rc |= run("cargo build -q --release --target x86_64-unknown-none --manifest-path rust/bhlog/Cargo.toml");
-    rc |= run("cargo build -q --release --target x86_64-unknown-none --manifest-path rust/bhcfg/Cargo.toml");
-    rc |= run("cargo build -q --release --target x86_64-unknown-none --manifest-path rust/bhnet/Cargo.toml");
-    rc |= run("cargo build -q --release --target x86_64-unknown-none --manifest-path rust/bhutil/Cargo.toml");
-
-    /* AArch64 */
-    rc |= run("cargo build -q --release --target aarch64-unknown-none --manifest-path rust/bhshim/Cargo.toml");
-    rc |= run("cargo build -q --release --target aarch64-unknown-none --manifest-path rust/bhcore/Cargo.toml");
-    rc |= run("cargo build -q --release --target aarch64-unknown-none --manifest-path rust/bhlog/Cargo.toml");
-    rc |= run("cargo build -q --release --target aarch64-unknown-none --manifest-path rust/bhcfg/Cargo.toml");
-    rc |= run("cargo build -q --release --target aarch64-unknown-none --manifest-path rust/bhnet/Cargo.toml");
-    rc |= run("cargo build -q --release --target aarch64-unknown-none --manifest-path rust/bhutil/Cargo.toml");
-
-    /* RISC-V 64 */
-    rc |= run("cargo build -q --release --target riscv64gc-unknown-none-elf --manifest-path rust/bhshim/Cargo.toml");
-    rc |= run("cargo build -q --release --target riscv64gc-unknown-none-elf --manifest-path rust/bhcore/Cargo.toml");
-    rc |= run("cargo build -q --release --target riscv64gc-unknown-none-elf --manifest-path rust/bhlog/Cargo.toml");
-    rc |= run("cargo build -q --release --target riscv64gc-unknown-none-elf --manifest-path rust/bhcfg/Cargo.toml");
-    rc |= run("cargo build -q --release --target riscv64gc-unknown-none-elf --manifest-path rust/bhnet/Cargo.toml");
-    rc |= run("cargo build -q --release --target riscv64gc-unknown-none-elf --manifest-path rust/bhutil/Cargo.toml");
-
-    /* LoongArch 64 – adjust target triple as needed if your toolchain differs */
-    rc |= run("cargo build -q --release --target loongarch64-unknown-none --manifest-path rust/bhshim/Cargo.toml");
-    rc |= run("cargo build -q --release --target loongarch64-unknown-none --manifest-path rust/bhcore/Cargo.toml");
-    rc |= run("cargo build -q --release --target loongarch64-unknown-none --manifest-path rust/bhlog/Cargo.toml");
-    rc |= run("cargo build -q --release --target loongarch64-unknown-none --manifest-path rust/bhcfg/Cargo.toml");
-    rc |= run("cargo build -q --release --target loongarch64-unknown-none --manifest-path rust/bhnet/Cargo.toml");
-    rc |= run("cargo build -q --release --target loongarch64-unknown-none --manifest-path rust/bhutil/Cargo.toml");
-
-    if (rc != 0) {
-        fprintf(stderr, "bhshim bootstrap: one or more cargo builds failed.\n");
+    if (len < 0 || (size_t)len >= sizeof(cmd)) {
+        fprintf(stderr, "bhshim bootstrap: command too long for %s (%s)\n", target, manifest_path);
         return 1;
     }
 
-    printf("bhshim bootstrap: Rust shims built successfully.\n");
+    return run(cmd);
+}
+
+int main(void) {
+    const char *cargo = getenv("CARGO");
+    int failed = 0;
+    size_t i;
+    size_t j;
+
+    const char *targets[] = {
+        "x86_64-unknown-none",
+        "aarch64-unknown-none",
+        "riscv64gc-unknown-none-elf",
+        "loongarch64-unknown-none"
+    };
+
+    const char *manifests[] = {
+        "rust/bhshim/Cargo.toml",
+        "rust/bhcore/Cargo.toml",
+        "rust/bhlog/Cargo.toml",
+        "rust/bhcfg/Cargo.toml",
+        "rust/bhnet/Cargo.toml",
+        "rust/bhutil/Cargo.toml"
+    };
+
+    if (cargo == NULL || cargo[0] == '\0') {
+        cargo = "cargo";
+    }
+
+    for (i = 0; i < (sizeof(targets) / sizeof(targets[0])); ++i) {
+        for (j = 0; j < (sizeof(manifests) / sizeof(manifests[0])); ++j) {
+            if (build_one(cargo, targets[i], manifests[j]) != 0) {
+                ++failed;
+            }
+        }
+    }
+
+    if (failed != 0) {
+        fprintf(stderr, "bhshim bootstrap: %d cargo build command(s) failed.\n", failed);
+        return 1;
+    }
+
+    printf("bhshim bootstrap: Rust crates built successfully.\n");
     return 0;
 }

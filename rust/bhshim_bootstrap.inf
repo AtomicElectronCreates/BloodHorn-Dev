@@ -1,7 +1,7 @@
 [Defines]
   INF_VERSION            = 0x00010005
   BASE_NAME              = BhshimBootstrap
-  FILE_GUID              = 12345678-0000-0000-0000-BHSHIMBOOT0001
+  FILE_GUID              = 6f4f3e3a-1c4c-4b7d-9a5e-9b3a5c4d1002
   MODULE_TYPE            = HOST_APPLICATION
   VERSION_STRING         = 0.1
 
