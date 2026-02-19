@@ -10,10 +10,6 @@
 
 ---
 
-> **Personal note**: I'm balancing BloodHorn development with sarcoma treatment. Contributions, bug reports, and kind messages genuinely help keep the project on track while I focus on my health.
-
----
-
 ## Project Status: Discontinued
 
 > **Notice**: BloodHorn is now discontinued because the main maintainer has stepped off active development. <img src="./winerr.png" alt="winerr" width="16"/>
